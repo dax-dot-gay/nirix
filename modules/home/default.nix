@@ -40,6 +40,33 @@ in
             description = "Custom niri package to use. If specified, this overrides `programs.niri.variant`";
         };
 
+        _raw_settings = mkOption {
+            type =
+                with lib.types;
+                let
+                    valueType =
+                        nullOr (oneOf [
+                            bool
+                            int
+                            float
+                            str
+                            path
+                            (attrsOf valueType)
+                            (listOf valueType)
+                        ])
+                        // {
+                            description = "Niri configuration value";
+                        };
+                in
+                types.submodule {
+                    freeformType = valueType;
+                };
+            default = { };
+            description = ''
+                KDL configuration for Niri written in Nix.
+            '';
+        };
+
         extraConfig = mkOption {
             type = types.lines;
             default = "";
@@ -57,7 +84,7 @@ in
 
         finalConfig = mkOption {
             type = types.lines;
-            default = (self.lib.mkNiriKDL cfg.settings) + "\n" + cfg.extraConfig;
+            default = (self.lib.mkNiriKDL cfg._raw_settings) + "\n" + cfg.extraConfig;
             defaultText = literalExpression ''(self.lib.mkNiriKDL cfg.settings) + "\n" + cfg.extraConfig'';
             description = ''
                 The final config applied to niri.
