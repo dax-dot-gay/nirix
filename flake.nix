@@ -21,7 +21,7 @@
     };
 
     outputs =
-        { self, nixpkgs }:
+        { self, nixpkgs, home-manager }@inputs:
         let
             inherit (nixpkgs) lib;
             lib' = import ./lib { inherit self nixpkgs lib; };
@@ -36,5 +36,20 @@
                 nirix = lib.modules.importApply ./modules/home { inherit self; };
                 default = self.homeModules.nirix;
             };
+            nixosConfigurations.dummy = nixpkgs.lib.nixosSystem {
+                system = "x86_64-linux";
+                modules = [
+                    ./modules/nixos.nix
+                ];
+                specialArgs = inputs;
+            };
+            homeConfigurations.dummy = home-manager.lib.homeManagerConfiguration {
+                pkgs = nixpkgs.legacyPackages.x86_64-linux;
+                modules = [
+                    ./modules/home
+                ];
+                specialArgs = inputs;
+            };
+
         };
 }
