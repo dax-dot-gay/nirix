@@ -21,12 +21,12 @@ in
         enable = mkEnableOption "Niri, a scrollable tiling Wayland compositor";
 
         variant = mkOption {
-            type = types.enum [
+            type = types.nullOr (types.enum [
                 "stable"
                 "unstable"
                 "unstable-blur"
-            ];
-            default = "stable";
+            ]);
+            default = null;
             description = ''
                 Which supported variant to choose, if not overridden by `programs.niri.package`.
                 - stable: use niri stable from nixpkgs
@@ -35,8 +35,8 @@ in
             '';
         };
         package = mkOption {
-            type = types.package;
-            default = variants.${cfg.variant};
+            type = types.nullOr types.package;
+            default = if isNull cfg.variants then null else variants.${cfg.variants};
             description = "Custom niri package to use. If specified, this overrides `programs.niri.variant`";
         };
 

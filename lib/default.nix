@@ -169,6 +169,20 @@ rec {
         '';
 
     mkNiriKDL = toKDL { };
+    mkNullOr = type: lib.mkOption {
+        type = lib.types.nullOr type;
+        default = null;
+    };
+    mkBool = default: lib.mkOption {
+        type = lib.types.bool;
+        default = default;
+    };
+    mkEnum = choices: lib.mkOption {
+        type = lib.types.enum choices;
+        default = choices[0];
+    };
+    mkSub = options: lib.types.submodule ({...}: {options = options;});
+    mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
 
     validatedConfigFor =
         niri-package: config:
