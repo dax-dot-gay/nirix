@@ -220,4 +220,4 @@ rec {
         };
         fmt-date = raw: "${date.year raw}-${date.month raw}-${date.day raw}";
     };
-} // (import ./layout.nix)
+} // ((import ./layout.nix) {lib = lib;})
