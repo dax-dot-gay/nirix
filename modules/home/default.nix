@@ -20,6 +20,7 @@ in
     imports = [
         ./input.nix
         ./layout.nix
+        ./output.nix
     ];
     options.wayland.windowManager.niri = {
         enable = mkEnableOption "Niri, a scrollable tiling Wayland compositor";
