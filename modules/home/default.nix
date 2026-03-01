@@ -22,6 +22,7 @@ in
         ./layout.nix
         ./output.nix
         ./binds.nix
+        ./switch-events.nix
     ];
     options.wayland.windowManager.niri = {
         enable = mkEnableOption "Niri, a scrollable tiling Wayland compositor";
