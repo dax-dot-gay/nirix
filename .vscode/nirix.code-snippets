@@ -45,5 +45,10 @@
             "   };",
             "}"
         ]
+    },
+    "mkAction": {
+        "scope": "nix",
+        "prefix": "mk",
+        "body": "mkAction \"$1\" {}"
     }
 }
