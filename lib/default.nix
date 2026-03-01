@@ -5,6 +5,7 @@
     self,
     lib,
     nixpkgs,
+    ...
 }:
 rec {
     # Taken from home-manager
@@ -181,8 +182,16 @@ rec {
         type = lib.types.enum choices;
         default = choices[0];
     };
+    mkNullEnum = choices: lib.mkOption {
+        type = lib.types.nullOr (lib.types.enum choices);
+        default = null;
+    };
     mkSub = options: lib.types.submodule ({...}: {options = options;});
     mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
+    mkOptDefault = type: default: lib.mkOption {
+        type = type;
+        default = default;
+    };
 
     validatedConfigFor =
         niri-package: config:
@@ -211,4 +220,4 @@ rec {
         };
         fmt-date = raw: "${date.year raw}-${date.month raw}-${date.day raw}";
     };
-}
+} // (import ./layout.nix)

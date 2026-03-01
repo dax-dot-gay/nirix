@@ -21,10 +21,10 @@
     };
 
     outputs =
-        { self, nixpkgs, home-manager, ... }@inputs:
+        { self, nixpkgs, home-manager, config, ... }@inputs:
         let
             inherit (nixpkgs) lib;
-            lib' = import ./lib { inherit self nixpkgs lib; };
+            lib' = import ./lib { inherit self nixpkgs lib config; };
         in
         {
             lib = lib';
