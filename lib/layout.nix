@@ -112,7 +112,7 @@ in
                 enable = mkBool false;
                 softness = mkNullOr numberType;
                 spread = mkNullOr numberType;
-                offset = mkNullOr (mkSubOpt {
+                offset = mkNullOr (mkSub {
                     x = mkOptDefault numberType 0;
                     y = mkOptDefault numberType 0;
                 });
