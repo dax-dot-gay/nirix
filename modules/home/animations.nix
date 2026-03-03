@@ -55,7 +55,7 @@ let
             supports-shader ? false,
         }:
         mkOption {
-            type = animationSubmoduleType // {
+            type = (animationSubmoduleType supports-shader) // {
                 check = types.addCheck (animationSubmoduleType supports-shader) (
                     opts:
                     (builtins.any (o -> o) [
