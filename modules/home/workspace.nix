@@ -27,6 +27,6 @@ in
             _args = [ name ];
             open-on-output = mkIfNotNull opts.open-on-output;
             layout = mkIfNotNull opts.layout;
-        }) cfg.workspaces;
+        }) cfg;
     };
 }
