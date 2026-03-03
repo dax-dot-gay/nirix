@@ -45,8 +45,7 @@ let
                             }
                         )
                     );
-                    custom-shader = mkIf supports-shader (mkNullOr types.str);
-                };
+                } // (optionalAttrs supports-shader { custom-shader = mkNullOr types.str; });
             }
         );
     mkAnimationOption =
