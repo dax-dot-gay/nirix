@@ -2,8 +2,6 @@
 with lib;
 let
     cfg = config.wayland.windowManager.niri.settings.window-rules;
-    niri = config.wayland.windowManager.niri;
-    raw = config.wayland.windowManager.niri._raw_settings;
 
     matcherType = types.submodule (
         { ... }:
