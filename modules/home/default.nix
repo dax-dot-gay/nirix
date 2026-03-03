@@ -50,7 +50,7 @@ in
         };
         package = mkOption {
             type = types.nullOr types.package;
-            default = if isNull cfg.variant then null else variants.${cfg.variants};
+            default = if isNull cfg.variant then null else variants.${cfg.variant};
             description = "Custom niri package to use. If specified, this overrides `programs.niri.variant`";
         };
 
