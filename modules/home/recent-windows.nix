@@ -44,7 +44,7 @@ in
     };
     config.wayland.windowManager.niri._raw_settings = {
         recent-windows =
-            if cfg.recent-windows.enable then
+            if cfg.enable then
                 {
                     debounce-ms = mkNullOr cfg.debounce-ms;
                     open-delay-ms = mkNullOr cfg.open-delay-ms;
