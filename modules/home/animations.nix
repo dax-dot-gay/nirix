@@ -14,7 +14,7 @@ let
                 options = {
                     enable = mkBool true;
                     duration-ms = mkNullOr types.ints.unsigned;
-                    curve = mkNullOr types.enum [
+                    curve = mkNullEnum [
                         "ease-out-quad"
                         "ease-out-cubic"
                         "ease-out-expo"
