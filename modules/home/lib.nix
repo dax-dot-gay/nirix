@@ -234,4 +234,43 @@ in
             bottom = mkIfNotNull l.struts.bottom;
         };
     };
+    mkNullOr =
+        type:
+        lib.mkOption {
+            type = lib.types.nullOr type;
+            default = null;
+        };
+    mkBool =
+        default:
+        lib.mkOption {
+            type = lib.types.bool;
+            default = default;
+        };
+    mkEnum =
+        choices:
+        lib.mkOption {
+            type = lib.types.enum choices;
+            default = choices [ 0 ];
+        };
+    mkNullEnum =
+        choices:
+        lib.mkOption {
+            type = lib.types.nullOr (lib.types.enum choices);
+            default = null;
+        };
+    mkSub =
+        options:
+        lib.types.submodule (
+            { ... }:
+            {
+                options = options;
+            }
+        );
+    mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
+    mkOptDefault =
+        type: default:
+        lib.mkOption {
+            type = type;
+            default = default;
+        };
 }

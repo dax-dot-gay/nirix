@@ -2,7 +2,6 @@
   This is ripped directly from https://codeberg.org/BANanaD3V/niri-nix/src/branch/main/lib/default.nix and would be notably less possible without it :D
 */
 {
-    self,
     lib,
     nixpkgs,
     ...
@@ -170,28 +169,6 @@ rec {
         '';
 
     mkNiriKDL = toKDL { };
-    mkNullOr = type: lib.mkOption {
-        type = lib.types.nullOr type;
-        default = null;
-    };
-    mkBool = default: lib.mkOption {
-        type = lib.types.bool;
-        default = default;
-    };
-    mkEnum = choices: lib.mkOption {
-        type = lib.types.enum choices;
-        default = choices[0];
-    };
-    mkNullEnum = choices: lib.mkOption {
-        type = lib.types.nullOr (lib.types.enum choices);
-        default = null;
-    };
-    mkSub = options: lib.types.submodule ({...}: {options = options;});
-    mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
-    mkOptDefault = type: default: lib.mkOption {
-        type = type;
-        default = default;
-    };
 
     validatedConfigFor =
         niri-package: config:
@@ -220,4 +197,4 @@ rec {
         };
         fmt-date = raw: "${date.year raw}-${date.month raw}-${date.day raw}";
     };
-} // ((import ./layout.nix) {lib = lib;})
+}

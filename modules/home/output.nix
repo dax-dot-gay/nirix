@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.outputs;
 in
