@@ -1,6 +1,6 @@
 { config, lib, ... }:
 with lib;
-let 
+let
     selflib = import ./lib.nix { inherit lib; };
 in
 with selflib;
@@ -55,35 +55,36 @@ let
             supports-shader ? false,
         }:
         mkOption {
-            type = animationSubmoduleType;
+            type = animationSubmoduleType // {
+                check = types.addCheck (animationSubmoduleType supports-shader) (
+                    opts:
+                    (builtins.any (o -> o) [
+                        (opts.enable == false)
+                        (
+                            opts.enable
+                            && (!isNull opts.duration-ms)
+                            && (!isNull opts.curve)
+                            && (isNull opts.custom-curve)
+                            && (isNull opts.spring)
+                        )
+                        (
+                            opts.enable
+                            && (!isNull opts.duration-ms)
+                            && (!isNull opts.custom-curve)
+                            && (isNull opts.curve)
+                            && (isNull opts.spring)
+                        )
+                        (
+                            opts.enable
+                            && (!isNull opts.spring)
+                            && (isNull opts.curve)
+                            && (isNull opts.custom-curve)
+                            && (isNull opts.duration-ms)
+                        )
+                    ])
+                );
+            };
             default = default;
-            check = types.addCheck (animationSubmoduleType supports-shader) (
-                opts:
-                (builtins.any (o -> o) [
-                    (opts.enable == false)
-                    (
-                        opts.enable
-                        && (!isNull opts.duration-ms)
-                        && (!isNull opts.curve)
-                        && (isNull opts.custom-curve)
-                        && (isNull opts.spring)
-                    )
-                    (
-                        opts.enable
-                        && (!isNull opts.duration-ms)
-                        && (!isNull opts.custom-curve)
-                        && (isNull opts.curve)
-                        && (isNull opts.spring)
-                    )
-                    (
-                        opts.enable
-                        && (!isNull opts.spring)
-                        && (isNull opts.curve)
-                        && (isNull opts.custom-curve)
-                        && (isNull opts.duration-ms)
-                    )
-                ])
-            );
         };
 
     renderAnimation =
