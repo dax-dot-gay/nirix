@@ -8,7 +8,7 @@ let
     cfg = config.wayland.windowManager.niri.settings.switch-events;
 in
 {
-    options.wayland.windowManager.niri.settings.switch-events = {
+    options.wayland.windowManager.niri.settings.switch-events = optionalBlock {
         lid-close = mkNullOr (types.listOf types.str);
         lid-open = mkNullOr (types.listOf types.str);
         tablet-mode-on = mkNullOr (types.listOf types.str);

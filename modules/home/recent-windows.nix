@@ -8,17 +8,17 @@ let
     cfg = config.wayland.windowManager.niri.settings.recent-windows;
 in
 {
-    options.wayland.windowManager.niri.settings.recent-windows = {
+    options.wayland.windowManager.niri.settings.recent-windows = optionalBlock {
         enable = mkBool true;
         debounce-ms = mkNullOr types.ints.unsigned;
         open-delay-ms = mkNullOr types.ints.unsigned;
-        highlight = {
+        highlight = optionalBlock {
             active-color = mkNullOr types.str;
             urgent-color = mkNullOr types.str;
             padding = mkNullOr types.numbers.nonnegative;
             corner-radius = mkNullOr types.numbers.nonnegative;
         };
-        previews = {
+        previews = optionalBlock {
             max-height = mkNullOr types.numbers.nonnegative;
             max-scale = mkNullOr types.numbers.nonnegative;
         };

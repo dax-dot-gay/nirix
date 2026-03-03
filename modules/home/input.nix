@@ -66,9 +66,9 @@ let
             { off = [ ]; };
 in
 {
-    options.wayland.windowManager.niri.settings.input = {
-        keyboard = {
-            xkb = {
+    options.wayland.windowManager.niri.settings.input = optionalBlock {
+        keyboard = optionalBlock {
+            xkb = optionalBlock {
                 layout = mkNullOr types.str;
                 variant = mkNullOr types.str;
                 options = mkNullOr types.str;
@@ -84,7 +84,7 @@ in
             ];
             numlock = mkBool true;
         };
-        touchpad = {
+        touchpad = optionalBlock ({
             tap = mkBool true;
             dwt = mkBool false;
             drag = mkBool false;
@@ -104,20 +104,20 @@ in
             disabled-on-external-mouse = mkBool false;
             scroll-factor = mkNullOr scroll-factor;
         }
-        // pointer-options;
-        trackpoint = pointer-options;
-        trackball = pointer-options;
-        mouse = {
+        // pointer-options);
+        trackpoint = optionalBlock pointer-options;
+        trackball = optionalBlock pointer-options;
+        mouse = optionalBlock ({
             scroll-factor = mkNullOr scroll-factor;
         }
-        // pointer-options;
-        tablet = {
+        // pointer-options);
+        tablet = optionalBlock {
             enable = mkBool false;
             map-to-output = mkNullOr types.str;
             left-handed = mkBool false;
             calibration-matrix = mkNullOr (types.listOf types.float);
         };
-        touch = {
+        touch = optionalBlock {
             enable = mkBool false;
             map-to-output = mkNullOr types.str;
             calibration-matrix = mkNullOr (types.listOf types.float);

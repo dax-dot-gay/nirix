@@ -118,7 +118,7 @@ let
             { off = [ ]; };
 in
 {
-    options.wayland.windowManager.niri.settings.animations = {
+    options.wayland.windowManager.niri.settings.animations = optionalBlock {
         enable = mkBool true;
         slowdown = mkNullOr types.numbers.nonnegative;
         workspace-switch = mkAnimationOption {

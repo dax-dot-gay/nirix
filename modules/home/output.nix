@@ -59,7 +59,7 @@ in
                             );
                             default = [ "top-left" ];
                         };
-                        layout = mkNullOr (mkLayoutOptions { });
+                        layout = optionalBlock (mkLayoutOptions {});
                         raw_layout = mkNullOr types.attrs;
                     };
                 }

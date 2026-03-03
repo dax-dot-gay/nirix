@@ -19,16 +19,16 @@ in
         prefer-no-csd = mkBool true;
         screenshot-path = mkOptDefault types.str "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
         environment = mkOptDefault (types.attrsOf (types.nullOr types.str)) { };
-        cursor = {
+        cursor = optionalBlock {
             xcursor-theme = mkNullOr types.str;
             xcursor-size = mkNullOr types.int;
             hide-when-typing = mkBool false;
             hide-after-inactive-ms = mkNullOr types.int;
         };
-        overview = {
+        overview = optionalBlock {
             zoom = mkNullOr types.float;
             backdrop-color = mkNullOr types.str;
-            workspace-shadow = {
+            workspace-shadow = optionalBlock {
                 enable = mkBool true;
                 softness = mkOptDefault numberType 40;
                 spread = mkOptDefault numberType 10;
@@ -41,7 +41,7 @@ in
         };
         xwayland-satellite = mkOptDefault (types.nullOr types.str) "xwayland-satellite";
         clipboard.disable-primary = mkBool false;
-        hotkey-overlay = {
+        hotkey-overlay = optionalBlock {
             skip-at-startup = mkBool false;
             hide-not-bound = mkBool false;
         };

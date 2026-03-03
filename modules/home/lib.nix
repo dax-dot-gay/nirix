@@ -273,4 +273,11 @@ in
             type = type;
             default = default;
         };
+
+    optionalBlock = options: mkOption {
+        type = types.submodule ({...}: {
+            options = options;
+        });
+        default = {};
+    };
 }

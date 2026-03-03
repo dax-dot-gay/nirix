@@ -20,6 +20,7 @@ in
                 }
             )
         );
+        default = {};
     };
     config.wayland.windowManager.niri._raw_settings = {
         workspace = mapAttrsToList (name: opts: {

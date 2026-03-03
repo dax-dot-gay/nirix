@@ -8,13 +8,13 @@ let
     cfg = config.wayland.windowManager.niri.settings.gestures;
 in
 {
-    options.wayland.windowManager.niri.settings.gestures = {
-        dnd-edge-view-scroll = {
+    options.wayland.windowManager.niri.settings.gestures = optionalBlock {
+        dnd-edge-view-scroll = optionalBlock {
             trigger-width = mkNullOr types.numbers.nonnegative;
             delay-ms = mkNullOr types.numbers.nonnegative;
             max-speed = mkNullOr types.numbers.nonnegative;
         };
-        dnd-edge-workspace-switch = {
+        dnd-edge-workspace-switch = optionalBlock {
             trigger-height = mkNullOr types.numbers.nonnegative;
             delay-ms = mkNullOr types.numbers.nonnegative;
             max-speed = mkNullOr types.numbers.nonnegative;

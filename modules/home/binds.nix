@@ -347,6 +347,14 @@ in
                 }
             )
         );
+        default = {
+            "Mod+Shift+Slash" = {
+                action = {show-hotkey-overlay = {};};
+            };
+            "Mod+T" = {
+                action = {spawn = {args = ["ghostty"];};};
+            };
+        };
     };
     config.wayland.windowManager.niri._raw_settings = {
         binds = mapAttrs (
