@@ -1,7 +1,7 @@
 { config, lib, ... }:
 with lib;
 let 
-    selflib = import ./lib { inherit lib; };
+    selflib = import ./lib.nix { inherit lib; };
 in
 with selflib;
 let
