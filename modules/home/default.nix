@@ -129,7 +129,7 @@ in
         xdg.configFile."niri/config.kdl" = {
             text =
                 if cfg.validation.enable then
-                    self.validatedConfigFor cfg.package cfg.finalConfig
+                    self.lib.validatedConfigFor cfg.package cfg.finalConfig
                 else
                     cfg.finalConfig;
         };
