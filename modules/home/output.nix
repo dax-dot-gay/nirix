@@ -1,5 +1,7 @@
+{self, ...}:
 { config, lib, ... }:
 with lib;
+with self.lib;
 let
     cfg = config.wayland.windowManager.niri.settings.outputs;
 in
