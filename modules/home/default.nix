@@ -27,6 +27,7 @@ in
         ./misc.nix
         ./window-rules.nix
         ./layer-rules.nix
+        ./animations.nix
     ];
     options.wayland.windowManager.niri = {
         enable = mkEnableOption "Niri, a scrollable tiling Wayland compositor";
