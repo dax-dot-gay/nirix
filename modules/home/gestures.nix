@@ -1,18 +1,20 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.gestures;
 in
 {
-    options.wayland.windowManager.niri.settings.gestures = {
-        dnd-edge-view-scroll = {
+    options.wayland.windowManager.niri.settings.gestures = optionalBlock {
+        dnd-edge-view-scroll = optionalBlock {
             trigger-width = mkNullOr types.numbers.nonnegative;
             delay-ms = mkNullOr types.numbers.nonnegative;
             max-speed = mkNullOr types.numbers.nonnegative;
         };
-        dnd-edge-workspace-switch = {
+        dnd-edge-workspace-switch = optionalBlock {
             trigger-height = mkNullOr types.numbers.nonnegative;
             delay-ms = mkNullOr types.numbers.nonnegative;
             max-speed = mkNullOr types.numbers.nonnegative;
@@ -31,12 +33,12 @@ in
     };
     config.wayland.windowManager.niri._raw_settings = {
         gestures = {
-            dnd-edge-view-scroll = {
+            dnd-edge-view-scroll = mkIfNotEmpty {
                 trigger-width = mkIfNotNull cfg.dnd-edge-view-scroll.trigger-width;
                 delay-ms = mkIfNotNull cfg.dnd-edge-view-scroll.delay-ms;
                 max-speed = mkIfNotNull cfg.dnd-edge-view-scroll.max-speed;
             };
-            dnd-edge-workspace-switch = {
+            dnd-edge-workspace-switch = mkIfNotEmpty {
                 trigger-height = mkIfNotNull cfg.dnd-edge-workspace-switch.trigger-height;
                 delay-ms = mkIfNotNull cfg.dnd-edge-workspace-switch.delay-ms;
                 max-speed = mkIfNotNull cfg.dnd-edge-workspace-switch.max-speed;

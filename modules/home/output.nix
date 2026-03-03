@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.outputs;
 in
@@ -57,7 +59,7 @@ in
                             );
                             default = [ "top-left" ];
                         };
-                        layout = mkNullOr (mkLayoutOptions { });
+                        layout = optionalBlock (mkLayoutOptions {});
                         raw_layout = mkNullOr types.attrs;
                     };
                 }
@@ -66,7 +68,7 @@ in
         default = { };
     };
     config.wayland.windowManager.niri._raw_settings = {
-        output = mapAttrsToList (name: value: {
+        output = mkIf ((length (attrNames cfg)) > 0) (mapAttrsToList (name: value: {
             _args = [ name ];
             mode = value.mode;
             scale = value.scale;
@@ -90,6 +92,6 @@ in
             layout = mkIf ((!isNull value.layout) || (!isNull value.raw_layout)) (
                 if !isNull value.raw_layout then value.raw_layout else (renderLayout value.layout)
             );
-        }) cfg;
+        }) cfg);
     };
 }

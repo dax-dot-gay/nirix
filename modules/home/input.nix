@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.input;
 
@@ -26,20 +28,22 @@ let
         left-handed = mkBool false;
         middle-emulation = mkBool false;
     };
-    scroll-factor = types.either types.float types.submodule (
-        { ... }:
-        {
-            options = {
-                horizontal = mkOption {
-                    type = types.float;
-                    default = 1.0;
+    scroll-factor = types.either types.float (
+        types.submodule (
+            { ... }:
+            {
+                options = {
+                    horizontal = mkOption {
+                        type = types.float;
+                        default = 1.0;
+                    };
+                    vertical = mkOption {
+                        type = types.float;
+                        default = 1.0;
+                    };
                 };
-                vertical = mkOption {
-                    type = types.float;
-                    default = 1.0;
-                };
-            };
-        }
+            }
+        )
     );
     mkPointer =
         {
@@ -47,9 +51,9 @@ let
             extra ? { },
         }:
         if cfg.${device}.enable == true then
-            (
+            mkIfNotEmpty (
                 {
-                    natrual-scroll = mkIf cfg.${device}.natural-scroll [ ];
+                    natural-scroll = mkIf cfg.${device}.natural-scroll [ ];
                     scroll-button-lock = mkIf cfg.${device}.scroll-button-lock [ ];
                     left-handed = mkIf cfg.${device}.left-handed [ ];
                     middle-emulation = mkIf cfg.${device}.middle-emulation [ ];
@@ -64,9 +68,9 @@ let
             { off = [ ]; };
 in
 {
-    options.wayland.windowManager.niri.settings.input = {
-        keyboard = {
-            xkb = {
+    options.wayland.windowManager.niri.settings.input = optionalBlock {
+        keyboard = optionalBlock {
+            xkb = optionalBlock {
                 layout = mkNullOr types.str;
                 variant = mkNullOr types.str;
                 options = mkNullOr types.str;
@@ -82,40 +86,44 @@ in
             ];
             numlock = mkBool true;
         };
-        touchpad = {
-            tap = mkBool true;
-            dwt = mkBool false;
-            drag = mkBool false;
-            drag-lock = mkBool false;
-            tap-button-map = mkNullOr (
-                types.enum [
-                    "left-right-middle"
-                    "left-middle-right"
-                ]
-            );
-            click-method = mkNullOr (
-                types.enum [
-                    "button-areas"
-                    "clickfinger"
-                ]
-            );
-            disabled-on-external-mouse = mkBool false;
-            scroll-factor = mkNullOr scroll-factor;
-        }
-        // pointer-options;
-        trackpoint = pointer-options;
-        trackball = pointer-options;
-        mouse = {
-            scroll-factor = mkNullOr scroll-factor;
-        }
-        // pointer-options;
-        tablet = {
+        touchpad = optionalBlock (
+            {
+                tap = mkBool true;
+                dwt = mkBool false;
+                drag = mkBool false;
+                drag-lock = mkBool false;
+                tap-button-map = mkNullOr (
+                    types.enum [
+                        "left-right-middle"
+                        "left-middle-right"
+                    ]
+                );
+                click-method = mkNullOr (
+                    types.enum [
+                        "button-areas"
+                        "clickfinger"
+                    ]
+                );
+                disabled-on-external-mouse = mkBool false;
+                scroll-factor = mkNullOr scroll-factor;
+            }
+            // pointer-options
+        );
+        trackpoint = optionalBlock pointer-options;
+        trackball = optionalBlock pointer-options;
+        mouse = optionalBlock (
+            {
+                scroll-factor = mkNullOr scroll-factor;
+            }
+            // pointer-options
+        );
+        tablet = optionalBlock {
             enable = mkBool false;
             map-to-output = mkNullOr types.str;
             left-handed = mkBool false;
             calibration-matrix = mkNullOr (types.listOf types.float);
         };
-        touch = {
+        touch = optionalBlock {
             enable = mkBool false;
             map-to-output = mkNullOr types.str;
             calibration-matrix = mkNullOr (types.listOf types.float);
@@ -145,7 +153,7 @@ in
         input = {
             keyboard = {
                 xkb =
-                    if (isNull cfg.keyboard.xkb.file) then
+                    mkIfNotEmpty (if (isNull cfg.keyboard.xkb.file) then
                         {
                             layout = mkIfNotNull cfg.keyboard.xkb.layout;
                             variant = mkIfNotNull cfg.keyboard.xkb.variant;
@@ -156,92 +164,93 @@ in
                     else
                         {
                             file = cfg.keyboard.xkb.file;
-                        };
+                        });
 
                 repeat-delay = mkIfNotNull cfg.keyboard.repeat-delay;
                 repeat-rate = mkIfNotNull cfg.keyboard.repeat-rate;
                 track-layout = cfg.keyboard.track-layout;
                 numlock = mkIf cfg.keyboard.numlock [ ];
             };
-        };
-        touchpad = mkPointer {
-            device = "touchpad";
-            extra = {
-                tap = mkIf cfg.touchpad.tap [ ];
-                dwt = mkIf cfg.touchpad.dwt [ ];
-                drag = mkIf cfg.touchpad.drag [ ];
-                drag-lock = mkIf cfg.touchpad.drag-lock [ ];
-                tap-button-map = mkIfNotNull cfg.touchpad.tap-button-map;
-                click-method = mkIfNotNull cfg.touchpad.click-method;
-                disabled-on-external-mouse = mkIf cfg.touchpad.disabled-on-external-mouse [ ];
-                scroll-factor = mkIf (!isNull cfg.touchpad.scroll-factor) (
-                    if isFloat cfg.touchpad.scroll-factor then
-                        cfg.touchpad.scroll-factor
-                    else
-                        {
-                            _props = {
-                                horizontal = cfg.touchpad.scroll-factor.horizontal;
-                                vertical = cfg.touchpad.scroll-factor.vertical;
-                            };
-                        }
-                );
-            };
-        };
-        trackpoint = mkPointer { device = "trackpoint"; };
-        trackball = mkPointer { device = "trackball"; };
-        tablet =
-            if cfg.tablet.enable then
-                {
-                    map-to-output = mkIfNotNull cfg.tablet.map-to-output;
-                    calibration-matrix = mkIfNotNull cfg.tablet.calibration-matrix;
-                    left-handed = mkIf cfg.tablet.left-handed [ ];
-                }
-            else
-                { off = [ ]; };
-        touch =
-            if cfg.touch.enable then
-                {
-                    map-to-output = mkIfNotNull cfg.tablet.map-to-output;
-                    calibration-matrix = mkIfNotNull cfg.tablet.calibration-matrix;
-                }
-            else
-                { off = [ ]; };
 
-        disable-power-key-handling = mkIf cfg.disable-power-key-handling [ ];
-        warp-mouse-to-focus =
-            mkIf
-                (
-                    (!isNull cfg.warp-mouse-to-focus)
-                    && (
-                        ((isBool cfg.warp-mouse-to-focus) && cfg.warp-mouse-to-focus) || (isAttrs cfg.warp-mouse-to-focus)
+            touchpad = mkPointer {
+                device = "touchpad";
+                extra = {
+                    tap = mkIf cfg.touchpad.tap [ ];
+                    dwt = mkIf cfg.touchpad.dwt [ ];
+                    drag = mkIf cfg.touchpad.drag [ ];
+                    drag-lock = mkIf cfg.touchpad.drag-lock [ ];
+                    tap-button-map = mkIfNotNull cfg.touchpad.tap-button-map;
+                    click-method = mkIfNotNull cfg.touchpad.click-method;
+                    disabled-on-external-mouse = mkIf cfg.touchpad.disabled-on-external-mouse [ ];
+                    scroll-factor = mkIf (!isNull cfg.touchpad.scroll-factor) (
+                        if isFloat cfg.touchpad.scroll-factor then
+                            cfg.touchpad.scroll-factor
+                        else
+                            {
+                                _props = {
+                                    horizontal = cfg.touchpad.scroll-factor.horizontal;
+                                    vertical = cfg.touchpad.scroll-factor.vertical;
+                                };
+                            }
+                    );
+                };
+            };
+            trackpoint = mkPointer { device = "trackpoint"; };
+            trackball = mkPointer { device = "trackball"; };
+            tablet =
+                if cfg.tablet.enable then
+                    {
+                        map-to-output = mkIfNotNull cfg.tablet.map-to-output;
+                        calibration-matrix = mkIfNotNull cfg.tablet.calibration-matrix;
+                        left-handed = mkIf cfg.tablet.left-handed [ ];
+                    }
+                else
+                    { off = [ ]; };
+            touch =
+                if cfg.touch.enable then
+                    mkIfNotEmpty {
+                        map-to-output = mkIfNotNull cfg.tablet.map-to-output;
+                        calibration-matrix = mkIfNotNull cfg.tablet.calibration-matrix;
+                    }
+                else
+                    { off = [ ]; };
+
+            disable-power-key-handling = mkIf cfg.disable-power-key-handling [ ];
+            warp-mouse-to-focus =
+                mkIf
+                    (
+                        (!isNull cfg.warp-mouse-to-focus)
+                        && (
+                            ((isBool cfg.warp-mouse-to-focus) && cfg.warp-mouse-to-focus) || (isAttrs cfg.warp-mouse-to-focus)
+                        )
                     )
-                )
-                (
-                    if isBool cfg.warp-mouse-to-focus then
-                        [ ]
-                    else
-                        {
-                            _props.mode = cfg.warp-mouse-to-focus.mode;
-                        }
-                );
-        focus-follows-mouse =
-            mkIf
-                (
-                    (!isNull cfg.focus-follows-mouse)
-                    && (
-                        ((isBool cfg.focus-follows-mouse) && cfg.focus-follows-mouse) || (isAttrs cfg.focus-follows-mouse)
+                    (
+                        if isBool cfg.warp-mouse-to-focus then
+                            [ ]
+                        else
+                            {
+                                _props.mode = cfg.warp-mouse-to-focus.mode;
+                            }
+                    );
+            focus-follows-mouse =
+                mkIf
+                    (
+                        (!isNull cfg.focus-follows-mouse)
+                        && (
+                            ((isBool cfg.focus-follows-mouse) && cfg.focus-follows-mouse) || (isAttrs cfg.focus-follows-mouse)
+                        )
                     )
-                )
-                (
-                    if isBool cfg.focus-follows-mouse then
-                        [ ]
-                    else
-                        {
-                            _props.max-scroll-amount = cfg.focus-follows-mouse.max-scroll-amount;
-                        }
-                );
-        workspace-auto-back-and-forth = mkIf cfg.workspace-auto-back-and-forth [ ];
-        mod-key = mkIfNotNull cfg.mod-key;
-        mod-key-nested = mkIfNotNull cfg.mod-key-nested;
+                    (
+                        if isBool cfg.focus-follows-mouse then
+                            [ ]
+                        else
+                            {
+                                _props.max-scroll-amount = cfg.focus-follows-mouse.max-scroll-amount;
+                            }
+                    );
+            workspace-auto-back-and-forth = mkIf cfg.workspace-auto-back-and-forth [ ];
+            mod-key = mkIfNotNull cfg.mod-key;
+            mod-key-nested = mkIfNotNull cfg.mod-key-nested;
+        };
     };
 }

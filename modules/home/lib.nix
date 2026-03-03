@@ -28,7 +28,7 @@ let
                     }
                 )
             );
-    gradientType = type.submodule (
+    gradientType = types.submodule (
         { ... }:
         {
             options = {
@@ -57,12 +57,147 @@ let
 
     renderSub =
         options: renderer: (if options.enable then ({ on = [ ]; } // renderer) else { off = [ ]; });
+    
+    mkNullOr =
+        type:
+        lib.mkOption {
+            type = lib.types.nullOr type;
+            default = null;
+        };
+    mkBool =
+        default:
+        lib.mkOption {
+            type = lib.types.bool;
+            default = default;
+        };
+    mkNullEnum =
+        choices:
+        lib.mkOption {
+            type = lib.types.nullOr (lib.types.enum choices);
+            default = null;
+        };
+    mkSub =
+        options:
+        lib.types.submodule (
+            { ... }:
+            {
+                options = options;
+            }
+        );
+    mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
+    mkOptDefault =
+        type: default:
+        lib.mkOption {
+            type = type;
+            default = default;
+        };
+    mkIfNotEmpty = value: if isAttrs value then mkIf ((length (filter (v: (v._type or "") != "if") (attrValues value))) > 0) value else mkIf ((length (filter (v: (v._type or "") != "if") value)) > 0) value;
 in
 {
-    sizeType = sizeType;
-    gradientType = gradientType;
-    renderGradient = renderGradient;
-    numberType = numberType;
+    numberType = types.either types.float types.int;
+    mkIfNotEmpty = value: if isAttrs value then mkIf ((length (filter (v: (v._type or "") != "if") (attrValues value))) > 0) value else mkIf ((length (filter (v: (v._type or "") != "if") value)) > 0) value;
+    sizeType =
+        types.either
+            (types.submodule (
+                { ... }:
+                {
+                    options = {
+                        proportion = mkOption {
+                            type = numberType;
+                            description = "A proportion (0.0-1.0) of the reference size";
+                        };
+                    };
+                }
+            ))
+            (
+                types.submodule (
+                    { ... }:
+                    {
+                        options = {
+                            fixed = mkOption {
+                                type = numberType;
+                                description = "A fixed size in logical pixels";
+                            };
+                        };
+                    }
+                )
+            );
+    gradientType = types.submodule (
+        { ... }:
+        {
+            options = {
+                from = mkOption {
+                    type = types.str;
+                };
+                to = mkOption {
+                    type = types.str;
+                };
+                angle = mkNullOr numberType;
+                relative-to-workspace-view = mkBool false;
+                color-space = mkNullOr types.str;
+            };
+        }
+    );
+
+    renderGradient = gradient: {
+        _props = {
+            from = gradient.from;
+            to = gradient.to;
+            angle = mkIfNotNull gradient.angle;
+            relative-to = mkIf gradient.relative-to-workspace-view "workspace-view";
+            "in" = mkIfNotNull gradient.color-space;
+        };
+    };
+
+    renderSub =
+        options: renderer: (if options.enable then ({ on = [ ]; } // renderer) else { off = [ ]; });
+    
+    mkNullOr =
+        type:
+        lib.mkOption {
+            type = lib.types.nullOr type;
+            default = null;
+        };
+    mkBool =
+        default:
+        lib.mkOption {
+            type = lib.types.bool;
+            default = default;
+        };
+    mkEnum =
+        choices:
+        lib.mkOption {
+            type = lib.types.enum choices;
+            default = elemAt choices 0;
+        };
+    mkNullEnum =
+        choices:
+        lib.mkOption {
+            type = lib.types.nullOr (lib.types.enum choices);
+            default = null;
+        };
+    mkSub =
+        options:
+        lib.types.submodule (
+            { ... }:
+            {
+                options = options;
+            }
+        );
+    mkIfNotNull = value: lib.mkIf (!(isNull value)) value;
+    mkOptDefault =
+        type: default:
+        lib.mkOption {
+            type = type;
+            default = default;
+        };
+
+    optionalBlock = options: mkOption {
+        type = types.submodule ({...}: {
+            options = options;
+        });
+        default = {};
+    };
     mkLayoutOptions =
         { }:
         {
@@ -155,19 +290,19 @@ in
             };
         };
 
-    renderLayout = l: {
+    renderLayout = l: mkIfNotEmpty {
         gaps = mkIfNotNull l.gaps;
         center-focused-column = mkIfNotNull l.center-focused-column;
         always-center-single-column = mkIf l.always-center-single-column [ ];
         empty-workspace-above-first = mkIf l.empty-workspace-above-first [ ];
         default-column-display = mkIfNotNull l.default-column-display;
         background-color = mkIfNotNull l.background-color;
-        preset-column-widths._children = mkIf ((length l.preset-column-widths) > 0) l.preset-column-widths;
+        preset-column-widths = mkIf ((length l.preset-column-widths) > 0) {_children = l.preset-column-widths;};
         default-column-width = mkIfNotNull l.default-column-width;
-        preset-window-heights._children = mkIf (
+        preset-window-heights = mkIf (
             (length l.preset-window-heights) > 0
-        ) l.preset-window-heights;
-        focus-ring = renderSub l.focus-ring {
+        ) {_children = l.preset-window-heights;};
+        focus-ring = mkIfNotEmpty (renderSub l.focus-ring {
             width = mkIfNotNull l.focus-ring.width;
             active-color = mkIfNotNull l.focus-ring.active-color;
             inactive-color = mkIfNotNull l.focus-ring.inactive-color;
@@ -181,8 +316,8 @@ in
             urgent-gradient = mkIf (!isNull l.focus-ring.urgent-gradient) (
                 renderGradient l.focus-ring.urgent-gradient
             );
-        };
-        border = renderSub l.border {
+        });
+        border = mkIfNotEmpty (renderSub l.border {
             width = mkIfNotNull l.border.width;
             active-color = mkIfNotNull l.border.active-color;
             inactive-color = mkIfNotNull l.border.inactive-color;
@@ -192,16 +327,16 @@ in
                 renderGradient l.border.inactive-gradient
             );
             urgent-gradient = mkIf (!isNull l.border.urgent-gradient) (renderGradient l.border.urgent-gradient);
-        };
-        shadow = renderSub l.shadow {
+        });
+        shadow = mkIfNotEmpty (renderSub l.shadow {
             softness = mkIfNotNull l.shadow.softness;
             spread = mkIfNotNull l.shadow.spread;
             offset._props = mkIfNotNull l.shadow.offset;
             draw-behind-window = l.shadow.draw-behind-window;
             color = mkIfNotNull l.shadow.color;
             inactive-color = mkIfNotNull l.shadow.inactive-color;
-        };
-        tab-indicator = renderSub l.tab-indicator {
+        });
+        tab-indicator = mkIfNotEmpty (renderSub l.tab-indicator {
             hide-when-single-tab = mkIf l.tab-indicator.hide-when-single-tab [ ];
             place-within-column = mkIf l.tab-indicator.place-within-column [ ];
             gap = mkIfNotNull l.tab-indicator.gap;
@@ -222,16 +357,17 @@ in
             urgent-gradient = mkIf (!isNull l.tab-indicator.urgent-gradient) (
                 renderGradient l.tab-indicator.urgent-gradient
             );
-        };
-        insert-hint = renderSub l.insert-hint {
+        });
+        insert-hint = mkIfNotEmpty (renderSub l.insert-hint {
             color = mkIfNotNull l.insert-hint.color;
             gradient = mkIf (!isNull l.insert-hint.gradient) (renderGradient l.insert-hint.gradient);
-        };
-        struts = {
+        });
+        struts = mkIfNotEmpty {
             left = mkIfNotNull l.struts.left;
             right = mkIfNotNull l.struts.right;
             top = mkIfNotNull l.struts.top;
             bottom = mkIfNotNull l.struts.bottom;
         };
     };
+    
 }

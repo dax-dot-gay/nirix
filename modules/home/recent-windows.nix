@@ -1,22 +1,24 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.recent-windows;
 in
 {
-    options.wayland.windowManager.niri.settings.recent-windows = {
+    options.wayland.windowManager.niri.settings.recent-windows = optionalBlock {
         enable = mkBool true;
         debounce-ms = mkNullOr types.ints.unsigned;
         open-delay-ms = mkNullOr types.ints.unsigned;
-        highlight = {
+        highlight = optionalBlock {
             active-color = mkNullOr types.str;
             urgent-color = mkNullOr types.str;
             padding = mkNullOr types.numbers.nonnegative;
             corner-radius = mkNullOr types.numbers.nonnegative;
         };
-        previews = {
+        previews = optionalBlock {
             max-height = mkNullOr types.numbers.nonnegative;
             max-scale = mkNullOr types.numbers.nonnegative;
         };
@@ -42,26 +44,26 @@ in
     };
     config.wayland.windowManager.niri._raw_settings = {
         recent-windows =
-            if cfg.recent-windows.enable then
-                {
-                    debounce-ms = mkNullOr cfg.debounce-ms;
-                    open-delay-ms = mkNullOr cfg.open-delay-ms;
-                    highlight = with cfg.highlight; {
-                        active-color = mkNullOr active-color;
-                        urgent-color = mkNullOr urgent-color;
-                        padding = mkNullOr padding;
-                        corner-radius = mkNullOr corner-radius;
-                    };
-                    previews = with cfg.previews; {
-                        max-height = mkNullOr max-height;
-                        max-scale = mkNullOr max-scale;
-                    };
-                    binds = mapAttrs (bind: action: {
+            if cfg.enable then
+                mkIfNotEmpty {
+                    debounce-ms = mkIfNotNull cfg.debounce-ms;
+                    open-delay-ms = mkIfNotNull cfg.open-delay-ms;
+                    highlight = mkIfNotEmpty (with cfg.highlight; {
+                        active-color = mkIfNotNull active-color;
+                        urgent-color = mkIfNotNull urgent-color;
+                        padding = mkIfNotNull padding;
+                        corner-radius = mkIfNotNull corner-radius;
+                    });
+                    previews = mkIfNotEmpty (with cfg.previews; {
+                        max-height = mkIfNotNull max-height;
+                        max-scale = mkIfNotNull max-scale;
+                    });
+                    binds = mkIfNotEmpty (mapAttrs (bind: action: {
                         next-window = mkIf (action.action == "next-window") { _props.filter = mkIfNotNull action.filter; };
                         previous-window = mkIf (action.action == "previous-window") {
                             _props.filter = mkIfNotNull action.filter;
                         };
-                    }) cfg.binds;
+                    }) cfg.binds);
                 }
             else
                 { off = [ ]; };

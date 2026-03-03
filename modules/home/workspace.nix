@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.workspaces;
 in
@@ -18,12 +20,13 @@ in
                 }
             )
         );
+        default = {};
     };
     config.wayland.windowManager.niri._raw_settings = {
-        workspace = mapAttrsToList (name: opts: {
+        workspace = mkIf ((length (attrNames cfg)) > 0) (mapAttrsToList (name: opts: {
             _args = [ name ];
             open-on-output = mkIfNotNull opts.open-on-output;
             layout = mkIfNotNull opts.layout;
-        }) cfg.workspaces;
+        }) cfg);
     };
 }

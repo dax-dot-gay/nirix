@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.layer-rules;
 
@@ -63,7 +65,7 @@ in
         default = [ ];
     };
     config.wayland.windowManager.niri._raw_settings = {
-        layer-rule = map (rule: {
+        layer-rule = mkIfNotEmpty  (map (rule: {
             _children = concatLists [
                 map (matcher: renderMatcher "match" matcher) rule.match
                 map (matcher: renderMatcher "exclude" matcher) rule.exclude
@@ -80,6 +82,6 @@ in
                 mkSChild rule "shadow" "color"
                 mkSChild rule "shadow" "inactive-color"
             ];
-        }) cfg;
+        }) cfg);
     };
 }

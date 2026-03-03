@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.animations;
     animationSubmoduleType =
@@ -12,7 +14,7 @@ let
                 options = {
                     enable = mkBool true;
                     duration-ms = mkNullOr types.ints.unsigned;
-                    curve = mkNullOr types.enum [
+                    curve = mkNullEnum [
                         "ease-out-quad"
                         "ease-out-cubic"
                         "ease-out-expo"
@@ -43,8 +45,7 @@ let
                             }
                         )
                     );
-                    custom-shader = mkIf supports-shader (mkNullOr types.str);
-                };
+                } // (optionalAttrs supports-shader { custom-shader = mkNullOr types.str; });
             }
         );
     mkAnimationOption =
@@ -53,35 +54,36 @@ let
             supports-shader ? false,
         }:
         mkOption {
-            type = animationSubmoduleType;
+            type = (animationSubmoduleType supports-shader) // {
+                check = types.addCheck (animationSubmoduleType supports-shader) (
+                    opts:
+                    (builtins.any (o -> o) [
+                        (opts.enable == false)
+                        (
+                            opts.enable
+                            && (!isNull opts.duration-ms)
+                            && (!isNull opts.curve)
+                            && (isNull opts.custom-curve)
+                            && (isNull opts.spring)
+                        )
+                        (
+                            opts.enable
+                            && (!isNull opts.duration-ms)
+                            && (!isNull opts.custom-curve)
+                            && (isNull opts.curve)
+                            && (isNull opts.spring)
+                        )
+                        (
+                            opts.enable
+                            && (!isNull opts.spring)
+                            && (isNull opts.curve)
+                            && (isNull opts.custom-curve)
+                            && (isNull opts.duration-ms)
+                        )
+                    ])
+                );
+            };
             default = default;
-            check = types.addCheck (animationSubmoduleType supports-shader) (
-                opts:
-                (builtins.any (o -> o) [
-                    (opts.enable == false)
-                    (
-                        opts.enable
-                        && (!isNull opts.duration-ms)
-                        && (!isNull opts.curve)
-                        && (isNull opts.custom-curve)
-                        && (isNull opts.spring)
-                    )
-                    (
-                        opts.enable
-                        && (!isNull opts.duration-ms)
-                        && (!isNull opts.custom-curve)
-                        && (isNull opts.curve)
-                        && (isNull opts.spring)
-                    )
-                    (
-                        opts.enable
-                        && (!isNull opts.spring)
-                        && (isNull opts.curve)
-                        && (isNull opts.custom-curve)
-                        && (isNull opts.duration-ms)
-                    )
-                ])
-            );
         };
 
     renderAnimation =
@@ -116,7 +118,7 @@ let
             { off = [ ]; };
 in
 {
-    options.wayland.windowManager.niri.settings.animations = {
+    options.wayland.windowManager.niri.settings.animations = optionalBlock {
         enable = mkBool true;
         slowdown = mkNullOr types.numbers.nonnegative;
         workspace-switch = mkAnimationOption {

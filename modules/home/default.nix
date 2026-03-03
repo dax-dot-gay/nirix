@@ -50,7 +50,7 @@ in
         };
         package = mkOption {
             type = types.nullOr types.package;
-            default = if isNull cfg.variants then null else variants.${cfg.variants};
+            default = if isNull cfg.variant then null else variants.${cfg.variant};
             description = "Custom niri package to use. If specified, this overrides `programs.niri.variant`";
         };
 
@@ -129,7 +129,7 @@ in
         xdg.configFile."niri/config.kdl" = {
             text =
                 if cfg.validation.enable then
-                    self.validatedConfigFor cfg.package cfg.finalConfig
+                    self.lib.validatedConfigFor cfg.package cfg.finalConfig
                 else
                     cfg.finalConfig;
         };

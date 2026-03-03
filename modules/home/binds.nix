@@ -1,221 +1,186 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.binds;
 
     mkAction =
-        name: args:
-        types.submodule (
-            { ... }:
-            {
-                options = {
-                    "${name}" = mkOption {
-                        type = types.submodule (
-                            { ... }:
-                            {
-                                options = args;
-                            }
-                        );
-                    };
-                };
-            }
-        );
-
-    genericActions =
-        actions:
-        map (
-            action:
+        args:
+        mkNullOr (
             types.submodule (
                 { ... }:
                 {
-                    options = {
-                        "${action}" = mkOption {
-                            type = types.either types.attrs (types.listOf types.anything);
-                            description = ''
-                                Either an attrset of properties or a list of positional arguments
-                            '';
-                        };
-                    };
+                    options = args;
                 }
             )
-        ) actions;
+        );
+    mkGenericAction = mkNullOr (types.either types.attrs (types.listOf types.anything));
 
-    actionTypes =
-        types.oneOf [
-            mkAction
-            "quit"
-            { skip-confirmation = mkBool false; }
-            mkAction
-            "spawn"
-            {
-                allow-when-locked = mkBool false;
-                args = mkOption { type = types.listOf types.str; };
-            }
-            mkAction
-            "spawn-sh"
-            {
-                allow-when-locked = mkBool false;
-                command = mkOption { type = types.str; };
-            }
-            mkAction
-            "do-screen-transition"
-            { delay-ms = mkNullOr types.int; }
-            mkAction
-            "screenshot"
-            {
-                write-to-disk = mkBool true;
-                show-pointer = mkBool true;
-            }
-            mkAction
-            "screenshot-screen"
-            {
-                write-to-disk = mkBool true;
-                show-pointer = mkBool true;
-            }
-            mkAction
-            "screenshot-window"
-            {
-                write-to-disk = mkBool true;
-                show-pointer = mkBool true;
-            }
-        ]
-        ++ genericActions [
-            "center-column"
-            "center-visible-columns"
-            "center-window"
-            "clear-dynamic-cast-target"
-            "close-overview"
-            "close-window"
-            "consume-or-expel-window-left"
-            "consume-or-expel-window-right"
-            "consume-window-into-column"
-            "debug-toggle-damage"
-            "debug-toggle-opaque-regions"
-            "expand-column-to-available-width"
-            "expel-window-from-column"
-            "focus-column"
-            "focus-column-first"
-            "focus-column-last"
-            "focus-column-left"
-            "focus-column-left-or-last"
-            "focus-column-or-monitor-left"
-            "focus-column-or-monitor-right"
-            "focus-column-right"
-            "focus-column-right-or-first"
-            "focus-floating"
-            "focus-monitor"
-            "focus-monitor-down"
-            "focus-monitor-left"
-            "focus-monitor-next"
-            "focus-monitor-previous"
-            "focus-monitor-right"
-            "focus-monitor-up"
-            "focus-tiling"
-            "focus-window"
-            "focus-window-bottom"
-            "focus-window-down"
-            "focus-window-down-or-column-left"
-            "focus-window-down-or-column-right"
-            "focus-window-down-or-top"
-            "focus-window-in-column"
-            "focus-window-or-monitor-down"
-            "focus-window-or-monitor-up"
-            "focus-window-or-workspace-down"
-            "focus-window-or-workspace-up"
-            "focus-window-previous"
-            "focus-window-top"
-            "focus-window-up"
-            "focus-window-up-or-bottom"
-            "focus-window-up-or-column-left"
-            "focus-window-up-or-column-right"
-            "focus-workspace"
-            "focus-workspace-down"
-            "focus-workspace-previous"
-            "focus-workspace-up"
-            "fullscreen-window"
-            "load-config-file"
-            "maximize-column"
-            "maximize-window-to-edges"
-            "move-column-left"
-            "move-column-left-or-to-monitor-left"
-            "move-column-right"
-            "move-column-right-or-to-monitor-right"
-            "move-column-to-first"
-            "move-column-to-index"
-            "move-column-to-last"
-            "move-column-to-monitor"
-            "move-column-to-monitor-down"
-            "move-column-to-monitor-left"
-            "move-column-to-monitor-next"
-            "move-column-to-monitor-previous"
-            "move-column-to-monitor-right"
-            "move-column-to-monitor-up"
-            "move-column-to-workspace"
-            "move-column-to-workspace-down"
-            "move-column-to-workspace-up"
-            "move-floating-window"
-            "move-window-down"
-            "move-window-down-or-to-workspace-down"
-            "move-window-to-floating"
-            "move-window-to-monitor"
-            "move-window-to-monitor-down"
-            "move-window-to-monitor-left"
-            "move-window-to-monitor-next"
-            "move-window-to-monitor-previous"
-            "move-window-to-monitor-right"
-            "move-window-to-monitor-up"
-            "move-window-to-tiling"
-            "move-window-to-workspace"
-            "move-window-to-workspace-down"
-            "move-window-to-workspace-up"
-            "move-window-up"
-            "move-window-up-or-to-workspace-up"
-            "move-workspace-down"
-            "move-workspace-to-index"
-            "move-workspace-to-monitor"
-            "move-workspace-to-monitor-down"
-            "move-workspace-to-monitor-left"
-            "move-workspace-to-monitor-next"
-            "move-workspace-to-monitor-previous"
-            "move-workspace-to-monitor-right"
-            "move-workspace-to-monitor-up"
-            "move-workspace-up"
-            "open-overview"
-            "power-off-monitors"
-            "power-on-monitors"
-            "reset-window-height"
-            "set-column-display"
-            "set-column-width"
-            "set-dynamic-cast-monitor"
-            "set-dynamic-cast-window"
-            "set-window-height"
-            "set-window-urgent"
-            "set-window-width"
-            "set-workspace-name"
-            "show-hotkey-overlay"
-            "swap-window-left"
-            "swap-window-right"
-            "switch-focus-between-floating-and-tiling"
-            "switch-layout"
-            "switch-preset-column-width"
-            "switch-preset-column-width-back"
-            "switch-preset-window-height"
-            "switch-preset-window-height-back"
-            "switch-preset-window-width"
-            "switch-preset-window-width-back"
-            "toggle-column-tabbed-display"
-            "toggle-debug-tint"
-            "toggle-keyboard-shortcuts-inhibit"
-            "toggle-overview"
-            "toggle-window-floating"
-            "toggle-window-rule-opacity"
-            "toggle-window-urgent"
-            "toggle-windowed-fullscreen"
-            "unset-window-urgent"
-            "unset-workspace-name"
-        ];
+    actionType = types.submodule (
+        { ... }:
+        {
+            options = {
+                quit = mkAction { skip-confirmation = mkBool false; };
+                spawn = mkAction {
+                    allow-when-locked = mkBool false;
+                    args = mkOption { type = types.listOf types.str; };
+                };
+                spawn-sh = mkAction {
+                    allow-when-locked = mkBool false;
+                    command = mkOption { type = types.str; };
+                };
+                do-screen-transition = mkAction { delay-ms = mkNullOr types.int; };
+                screenshot = mkAction {
+                    write-to-disk = mkBool true;
+                    show-pointer = mkBool true;
+                };
+                screenshot-screen = mkAction {
+                    write-to-disk = mkBool true;
+                    show-pointer = mkBool true;
+                };
+                screenshot-window = mkAction {
+                    write-to-disk = mkBool true;
+                    show-pointer = mkBool true;
+                };
+                center-column = mkGenericAction;
+                center-visible-columns = mkGenericAction;
+                center-window = mkGenericAction;
+                clear-dynamic-cast-target = mkGenericAction;
+                close-overview = mkGenericAction;
+                close-window = mkGenericAction;
+                consume-or-expel-window-left = mkGenericAction;
+                consume-or-expel-window-right = mkGenericAction;
+                consume-window-into-column = mkGenericAction;
+                debug-toggle-damage = mkGenericAction;
+                debug-toggle-opaque-regions = mkGenericAction;
+                expand-column-to-available-width = mkGenericAction;
+                expel-window-from-column = mkGenericAction;
+                focus-column = mkGenericAction;
+                focus-column-first = mkGenericAction;
+                focus-column-last = mkGenericAction;
+                focus-column-left = mkGenericAction;
+                focus-column-left-or-last = mkGenericAction;
+                focus-column-or-monitor-left = mkGenericAction;
+                focus-column-or-monitor-right = mkGenericAction;
+                focus-column-right = mkGenericAction;
+                focus-column-right-or-first = mkGenericAction;
+                focus-floating = mkGenericAction;
+                focus-monitor = mkGenericAction;
+                focus-monitor-down = mkGenericAction;
+                focus-monitor-left = mkGenericAction;
+                focus-monitor-next = mkGenericAction;
+                focus-monitor-previous = mkGenericAction;
+                focus-monitor-right = mkGenericAction;
+                focus-monitor-up = mkGenericAction;
+                focus-tiling = mkGenericAction;
+                focus-window = mkGenericAction;
+                focus-window-bottom = mkGenericAction;
+                focus-window-down = mkGenericAction;
+                focus-window-down-or-column-left = mkGenericAction;
+                focus-window-down-or-column-right = mkGenericAction;
+                focus-window-down-or-top = mkGenericAction;
+                focus-window-in-column = mkGenericAction;
+                focus-window-or-monitor-down = mkGenericAction;
+                focus-window-or-monitor-up = mkGenericAction;
+                focus-window-or-workspace-down = mkGenericAction;
+                focus-window-or-workspace-up = mkGenericAction;
+                focus-window-previous = mkGenericAction;
+                focus-window-top = mkGenericAction;
+                focus-window-up = mkGenericAction;
+                focus-window-up-or-bottom = mkGenericAction;
+                focus-window-up-or-column-left = mkGenericAction;
+                focus-window-up-or-column-right = mkGenericAction;
+                focus-workspace = mkGenericAction;
+                focus-workspace-down = mkGenericAction;
+                focus-workspace-previous = mkGenericAction;
+                focus-workspace-up = mkGenericAction;
+                fullscreen-window = mkGenericAction;
+                load-config-file = mkGenericAction;
+                maximize-column = mkGenericAction;
+                maximize-window-to-edges = mkGenericAction;
+                move-column-left = mkGenericAction;
+                move-column-left-or-to-monitor-left = mkGenericAction;
+                move-column-right = mkGenericAction;
+                move-column-right-or-to-monitor-right = mkGenericAction;
+                move-column-to-first = mkGenericAction;
+                move-column-to-index = mkGenericAction;
+                move-column-to-last = mkGenericAction;
+                move-column-to-monitor = mkGenericAction;
+                move-column-to-monitor-down = mkGenericAction;
+                move-column-to-monitor-left = mkGenericAction;
+                move-column-to-monitor-next = mkGenericAction;
+                move-column-to-monitor-previous = mkGenericAction;
+                move-column-to-monitor-right = mkGenericAction;
+                move-column-to-monitor-up = mkGenericAction;
+                move-column-to-workspace = mkGenericAction;
+                move-column-to-workspace-down = mkGenericAction;
+                move-column-to-workspace-up = mkGenericAction;
+                move-floating-window = mkGenericAction;
+                move-window-down = mkGenericAction;
+                move-window-down-or-to-workspace-down = mkGenericAction;
+                move-window-to-floating = mkGenericAction;
+                move-window-to-monitor = mkGenericAction;
+                move-window-to-monitor-down = mkGenericAction;
+                move-window-to-monitor-left = mkGenericAction;
+                move-window-to-monitor-next = mkGenericAction;
+                move-window-to-monitor-previous = mkGenericAction;
+                move-window-to-monitor-right = mkGenericAction;
+                move-window-to-monitor-up = mkGenericAction;
+                move-window-to-tiling = mkGenericAction;
+                move-window-to-workspace = mkGenericAction;
+                move-window-to-workspace-down = mkGenericAction;
+                move-window-to-workspace-up = mkGenericAction;
+                move-window-up = mkGenericAction;
+                move-window-up-or-to-workspace-up = mkGenericAction;
+                move-workspace-down = mkGenericAction;
+                move-workspace-to-index = mkGenericAction;
+                move-workspace-to-monitor = mkGenericAction;
+                move-workspace-to-monitor-down = mkGenericAction;
+                move-workspace-to-monitor-left = mkGenericAction;
+                move-workspace-to-monitor-next = mkGenericAction;
+                move-workspace-to-monitor-previous = mkGenericAction;
+                move-workspace-to-monitor-right = mkGenericAction;
+                move-workspace-to-monitor-up = mkGenericAction;
+                move-workspace-up = mkGenericAction;
+                open-overview = mkGenericAction;
+                power-off-monitors = mkGenericAction;
+                power-on-monitors = mkGenericAction;
+                reset-window-height = mkGenericAction;
+                set-column-display = mkGenericAction;
+                set-column-width = mkGenericAction;
+                set-dynamic-cast-monitor = mkGenericAction;
+                set-dynamic-cast-window = mkGenericAction;
+                set-window-height = mkGenericAction;
+                set-window-urgent = mkGenericAction;
+                set-window-width = mkGenericAction;
+                set-workspace-name = mkGenericAction;
+                show-hotkey-overlay = mkGenericAction;
+                swap-window-left = mkGenericAction;
+                swap-window-right = mkGenericAction;
+                switch-focus-between-floating-and-tiling = mkGenericAction;
+                switch-layout = mkGenericAction;
+                switch-preset-column-width = mkGenericAction;
+                switch-preset-column-width-back = mkGenericAction;
+                switch-preset-window-height = mkGenericAction;
+                switch-preset-window-height-back = mkGenericAction;
+                switch-preset-window-width = mkGenericAction;
+                switch-preset-window-width-back = mkGenericAction;
+                toggle-column-tabbed-display = mkGenericAction;
+                toggle-debug-tint = mkGenericAction;
+                toggle-keyboard-shortcuts-inhibit = mkGenericAction;
+                toggle-overview = mkGenericAction;
+                toggle-window-floating = mkGenericAction;
+                toggle-window-rule-opacity = mkGenericAction;
+                toggle-window-urgent = mkGenericAction;
+                toggle-windowed-fullscreen = mkGenericAction;
+                unset-window-urgent = mkGenericAction;
+                unset-workspace-name = mkGenericAction;
+            };
+        }
+    );
 
     actionRenderers = {
         quit = opts: {
@@ -239,7 +204,7 @@ let
                 allow-inhibiting = mkIf (!opts.allow-inhibiting) opts.allow-inhibiting;
                 allow-when-locked = mkIf opts.action.spawn.allow-when-locked opts.action.spawn.allow-when-locked;
             };
-            _args = opts.action.spawn.args;
+            spawn._args = opts.action.spawn.args;
         };
         spawn-sh = opts: {
             _props = {
@@ -251,7 +216,7 @@ let
                 allow-inhibiting = mkIf (!opts.allow-inhibiting) opts.allow-inhibiting;
                 allow-when-locked = mkIf opts.action.spawn-sh.allow-when-locked opts.action.spawn-sh.allow-when-locked;
             };
-            _args = [ opts.action.spawn-sh.command ];
+            spawn-sh._args = [ opts.action.spawn-sh.command ];
         };
         do-screen-transition = opts: {
             _props = {
@@ -339,18 +304,33 @@ in
                         hotkey-overlay-title = mkNullOr (types.either types.bool types.str);
                         allow-inhibiting = mkBool true;
                         action = mkOption {
-                            type = actionTypes;
+                            type = actionType;
+                            default = { };
                         };
                     };
                 }
             )
         );
+        default = {
+            "Mod+T" = {
+                action = {
+                    spawn = {
+                        args = [ "ghostty" ];
+                    };
+                };
+            };
+        };
     };
     config.wayland.windowManager.niri._raw_settings = {
-        binds = mapAttrs (
+        binds = mkIfNotEmpty (mapAttrs (
             bind: opts:
             let
-                action = elemAt (attrNames opts.action) 0;
+                enabledActions = attrNames (filterAttrs (name: val: !isNull val) opts.action);
+                action =
+                    if ((length enabledActions) == 1) then
+                        (elemAt enabledActions 0)
+                    else
+                        throw "Exactly one action must be specified.";
             in
             (
                 if hasAttr action actionRenderers then
@@ -358,6 +338,6 @@ in
                 else
                     renderGenericAction action opts
             )
-        ) cfg;
+        ) cfg);
     };
 }

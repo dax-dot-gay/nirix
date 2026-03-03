@@ -1,7 +1,9 @@
-{self, ...}:
 { config, lib, ... }:
 with lib;
-with self.lib;
+let 
+    selflib = import ./lib.nix { inherit lib; };
+in
+with selflib;
 let
     cfg = config.wayland.windowManager.niri.settings.window-rules;
 
@@ -153,7 +155,7 @@ in
         default = [ ];
     };
     config.wayland.windowManager.niri._raw_settings = {
-        window-rule = map (rule: {
+        window-rule = mkIf ((length cfg) > 0) (map (rule: {
             _children = concatLists (with rule; [
                 map (matcher: renderMatcher "match" matcher) match
                 map (matcher: renderMatcher "exclude" matcher) exclude
@@ -231,6 +233,6 @@ in
                 mkSGradient dynamic "tab-indicator" "inactive-gradient"
                 mkSGradient dynamic "tab-indicator" "urgent-gradient"
             ]);
-        }) cfg;
+        }) cfg);
     };
 }
