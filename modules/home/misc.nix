@@ -42,6 +42,7 @@ in
             hide-not-bound = mkBool false;
         };
         config-notification.disable-failed = mkBool false;
+        debug = mkNullOr types.attrs;
     };
     config.wayland.windowManager.niri._raw_settings = {
         spawn-sh-at-startup = map (v: [ v ]) cfg.spawn-at-startup;
@@ -93,5 +94,6 @@ in
                 hide-not-bound = mkIf hk.hide-not-bound [ ];
             };
         config-notification.disable-failed = mkIf cfg.config-notification.disable-failed [ ];
+        debug = mkIfNotNull cfg.debug;
     };
 }
