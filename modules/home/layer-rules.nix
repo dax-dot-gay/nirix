@@ -36,8 +36,8 @@ in
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.listOf matcherType) [ ];
-                        exclude = mkOptDefault (types.listOf matcherType) [ ];
+                        match = mkOptDefault (types.attrsOf matcherType) {};
+                        exclude = mkOptDefault (types.attrsOf matcherType) {};
                         opacity = mkNullOr types.float;
                         block-out-from = mkNullOr (
                             types.enum [
@@ -71,9 +71,9 @@ in
             map (rule: {
                 _children = concatLists [
                     map
-                    ((matcher: renderMatcher "match" matcher) rule.match)
+                    ((matcher: renderMatcher "match" matcher) (attrValues rule.match))
                     map
-                    ((matcher: renderMatcher "exclude" matcher) rule.exclude)
+                    ((matcher: renderMatcher "exclude" matcher) (attrValues rule.exclude))
                     (mkChild rule "opacity")
                     (mkChild rule "block-out-from")
                     (mkChild rule "geometry-corner-radius")

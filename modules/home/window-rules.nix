@@ -55,8 +55,8 @@ in
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.listOf matcherType) [ ];
-                        exclude = mkOptDefault (types.listOf matcherType) [ ];
+                        match = mkOptDefault (types.attrsOf matcherType) {};
+                        exclude = mkOptDefault (types.attrsOf matcherType) {};
                         on-open = {
                             default-column-width = mkNullOr sizeType;
                             default-window-height = mkNullOr sizeType;
@@ -183,8 +183,8 @@ in
                 _children = concatLists (
                     with rule;
                     [
-                        (map (matcher: renderMatcher "match" matcher) match)
-                        (map (matcher: renderMatcher "exclude" matcher) exclude)
+                        (map (matcher: renderMatcher "match" matcher) (attrValues match))
+                        (map (matcher: renderMatcher "exclude" matcher) (attrValues exclude))
                         (mkChild on-open "default-column-width")
                         (mkChild on-open "default-window-height")
                         (mkChild on-open "open-on-output")
