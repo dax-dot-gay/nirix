@@ -25,11 +25,11 @@ let
             options = {
                 #quit = mkAction { skip-confirmation = mkBool false; };
                 quit = mkOption {
-                    type = types.submodule ({...}: {
+                    type = types.nullOr (types.submodule ({...}: {
                         options = {
                             skip-confirmation = mkBool false;
                         };
-                    });
+                    }));
                 };
                 /*spawn = mkAction {
                     allow-when-locked = mkBool false;
