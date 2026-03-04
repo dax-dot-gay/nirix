@@ -52,7 +52,7 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.window-rules = mkOption {
-        type = types.listOf (
+        type = types.attrsOf (
             types.submodule (
                 { ... }:
                 {
@@ -177,7 +177,7 @@ in
                 }
             )
         );
-        default = [];
+        default = {};
     };
     config.wayland.windowManager.niri._raw_settings = {
         window-rule = mkIfNotEmpty (
@@ -272,7 +272,7 @@ in
                         (mkSGradient dynamic "tab-indicator" "urgent-gradient")
                     ]
                 );
-            }) cfg
+            }) (attrValues cfg)
         );
     };
 }

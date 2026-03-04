@@ -33,7 +33,7 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.layer-rules = mkOption {
-        type = types.listOf (
+        type = types.attrsOf (
             types.submodule (
                 { ... }:
                 {
@@ -66,7 +66,7 @@ in
                 }
             )
         );
-        default = [];
+        default = {};
     };
     config.wayland.windowManager.niri._raw_settings = {
         layer-rule = mkIfNotEmpty (
@@ -91,7 +91,7 @@ in
                     (mkSChild rule "shadow" "color")
                     (mkSChild rule "shadow" "inactive-color")
                 ];
-            }) cfg
+            }) (attrValues cfg)
         );
     };
 }
