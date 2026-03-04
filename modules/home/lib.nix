@@ -95,10 +95,10 @@ let
         value:
         if isAttrs value then
             mkIf (
-                (length (filter (v: ((v._type or "") != "if") && (v.condition or true)) (attrValues value))) > 0
+                (length (filter (v: ((v._type or "") != "if") || (((v._type or "") == "if") && (v.condition or true))) (attrValues value))) > 0
             ) value
         else
-            mkIf ((length (filter (v: ((v._type or "") != "if") && (v.condition or true)) value)) > 0) value;
+            mkIf ((length (filter (v: ((v._type or "") != "if") || (((v._type or "") == "if") && (v.condition or true))) value)) > 0) value;
 in
 {
     numberType = types.either types.float types.int;
@@ -106,10 +106,10 @@ in
         value:
         if isAttrs value then
             mkIf (
-                (length (filter (v: ((v._type or "") != "if") && (v.condition or true)) (attrValues value))) > 0
+                (length (filter (v: ((v._type or "") != "if") || (((v._type or "") == "if") && (v.condition or true))) (attrValues value))) > 0
             ) value
         else
-            mkIf ((length (filter (v: ((v._type or "") != "if") && (v.condition or true)) value)) > 0) value;
+            mkIf ((length (filter (v: ((v._type or "") != "if") || (((v._type or "") == "if") && (v.condition or true))) value)) > 0) value;
     sizeType =
         types.either
             (types.submodule (
