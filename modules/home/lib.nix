@@ -57,7 +57,7 @@ let
 
     renderSub =
         options: renderer: (if options.enable then ({ on = [ ]; } // renderer) else { off = [ ]; });
-    
+
     mkNullOr =
         type:
         lib.mkOption {
@@ -91,11 +91,25 @@ let
             type = type;
             default = default;
         };
-    mkIfNotEmpty = value: if isAttrs value then mkIf ((length (filter (v: (v._type or "") != "if") (attrValues value))) > 0) value else mkIf ((length (filter (v: (v._type or "") != "if") value)) > 0) value;
+    mkIfNotEmpty =
+        value:
+        if isAttrs value then
+            mkIf (
+                (length (filter (v: ((v._type or "") != "if") && (v.condition or true)) (attrValues value))) > 0
+            ) value
+        else
+            mkIf ((length (filter (v: ((v._type or "") != "if") && (v.condition or true)) value)) > 0) value;
 in
 {
     numberType = types.either types.float types.int;
-    mkIfNotEmpty = value: if isAttrs value then mkIf ((length (filter (v: (v._type or "") != "if") (attrValues value))) > 0) value else mkIf ((length (filter (v: (v._type or "") != "if") value)) > 0) value;
+    mkIfNotEmpty =
+        value:
+        if isAttrs value then
+            mkIf (
+                (length (filter (v: ((v._type or "") != "if") && (v.condition or true)) (attrValues value))) > 0
+            ) value
+        else
+            mkIf ((length (filter (v: ((v._type or "") != "if") && (v.condition or true)) value)) > 0) value;
     sizeType =
         types.either
             (types.submodule (
@@ -151,7 +165,7 @@ in
 
     renderSub =
         options: renderer: (if options.enable then ({ on = [ ]; } // renderer) else { off = [ ]; });
-    
+
     mkNullOr =
         type:
         lib.mkOption {
@@ -192,12 +206,17 @@ in
             default = default;
         };
 
-    optionalBlock = options: mkOption {
-        type = types.submodule ({...}: {
-            options = options;
-        });
-        default = {};
-    };
+    optionalBlock =
+        options:
+        mkOption {
+            type = types.submodule (
+                { ... }:
+                {
+                    options = options;
+                }
+            );
+            default = { };
+        };
     mkLayoutOptions =
         { }:
         {
@@ -290,84 +309,98 @@ in
             };
         };
 
-    renderLayout = l: mkIfNotEmpty {
-        gaps = mkIfNotNull l.gaps;
-        center-focused-column = mkIfNotNull l.center-focused-column;
-        always-center-single-column = mkIf l.always-center-single-column [ ];
-        empty-workspace-above-first = mkIf l.empty-workspace-above-first [ ];
-        default-column-display = mkIfNotNull l.default-column-display;
-        background-color = mkIfNotNull l.background-color;
-        preset-column-widths = mkIf ((length l.preset-column-widths) > 0) {_children = l.preset-column-widths;};
-        default-column-width = mkIfNotNull l.default-column-width;
-        preset-window-heights = mkIf (
-            (length l.preset-window-heights) > 0
-        ) {_children = l.preset-window-heights;};
-        focus-ring = mkIfNotEmpty (renderSub l.focus-ring {
-            width = mkIfNotNull l.focus-ring.width;
-            active-color = mkIfNotNull l.focus-ring.active-color;
-            inactive-color = mkIfNotNull l.focus-ring.inactive-color;
-            urgent-color = mkIfNotNull l.focus-ring.urgent-color;
-            active-gradient = mkIf (!isNull l.focus-ring.active-gradient) (
-                renderGradient l.focus-ring.active-gradient
+    renderLayout =
+        l:
+        mkIfNotEmpty {
+            gaps = mkIfNotNull l.gaps;
+            center-focused-column = mkIfNotNull l.center-focused-column;
+            always-center-single-column = mkIf l.always-center-single-column [ ];
+            empty-workspace-above-first = mkIf l.empty-workspace-above-first [ ];
+            default-column-display = mkIfNotNull l.default-column-display;
+            background-color = mkIfNotNull l.background-color;
+            preset-column-widths = mkIf ((length l.preset-column-widths) > 0) {
+                _children = l.preset-column-widths;
+            };
+            default-column-width = mkIfNotNull l.default-column-width;
+            preset-window-heights = mkIf ((length l.preset-window-heights) > 0) {
+                _children = l.preset-window-heights;
+            };
+            focus-ring = mkIfNotEmpty (
+                renderSub l.focus-ring {
+                    width = mkIfNotNull l.focus-ring.width;
+                    active-color = mkIfNotNull l.focus-ring.active-color;
+                    inactive-color = mkIfNotNull l.focus-ring.inactive-color;
+                    urgent-color = mkIfNotNull l.focus-ring.urgent-color;
+                    active-gradient = mkIf (!isNull l.focus-ring.active-gradient) (
+                        renderGradient l.focus-ring.active-gradient
+                    );
+                    inactive-gradient = mkIf (!isNull l.focus-ring.inactive-gradient) (
+                        renderGradient l.focus-ring.inactive-gradient
+                    );
+                    urgent-gradient = mkIf (!isNull l.focus-ring.urgent-gradient) (
+                        renderGradient l.focus-ring.urgent-gradient
+                    );
+                }
             );
-            inactive-gradient = mkIf (!isNull l.focus-ring.inactive-gradient) (
-                renderGradient l.focus-ring.inactive-gradient
+            border = mkIfNotEmpty (
+                renderSub l.border {
+                    width = mkIfNotNull l.border.width;
+                    active-color = mkIfNotNull l.border.active-color;
+                    inactive-color = mkIfNotNull l.border.inactive-color;
+                    urgent-color = mkIfNotNull l.border.urgent-color;
+                    active-gradient = mkIf (!isNull l.border.active-gradient) (renderGradient l.border.active-gradient);
+                    inactive-gradient = mkIf (!isNull l.border.inactive-gradient) (
+                        renderGradient l.border.inactive-gradient
+                    );
+                    urgent-gradient = mkIf (!isNull l.border.urgent-gradient) (renderGradient l.border.urgent-gradient);
+                }
             );
-            urgent-gradient = mkIf (!isNull l.focus-ring.urgent-gradient) (
-                renderGradient l.focus-ring.urgent-gradient
+            shadow = mkIfNotEmpty (
+                renderSub l.shadow {
+                    softness = mkIfNotNull l.shadow.softness;
+                    spread = mkIfNotNull l.shadow.spread;
+                    offset._props = mkIfNotNull l.shadow.offset;
+                    draw-behind-window = l.shadow.draw-behind-window;
+                    color = mkIfNotNull l.shadow.color;
+                    inactive-color = mkIfNotNull l.shadow.inactive-color;
+                }
             );
-        });
-        border = mkIfNotEmpty (renderSub l.border {
-            width = mkIfNotNull l.border.width;
-            active-color = mkIfNotNull l.border.active-color;
-            inactive-color = mkIfNotNull l.border.inactive-color;
-            urgent-color = mkIfNotNull l.border.urgent-color;
-            active-gradient = mkIf (!isNull l.border.active-gradient) (renderGradient l.border.active-gradient);
-            inactive-gradient = mkIf (!isNull l.border.inactive-gradient) (
-                renderGradient l.border.inactive-gradient
+            tab-indicator = mkIfNotEmpty (
+                renderSub l.tab-indicator {
+                    hide-when-single-tab = mkIf l.tab-indicator.hide-when-single-tab [ ];
+                    place-within-column = mkIf l.tab-indicator.place-within-column [ ];
+                    gap = mkIfNotNull l.tab-indicator.gap;
+                    width = mkIfNotNull l.tab-indicator.width;
+                    length._props.total-proportion = mkIfNotNull l.tab-indicator.length;
+                    position = mkIfNotNull l.tab-indicator.position;
+                    gaps-between-tabs = mkIfNotNull l.tab-indicator.gaps-between-tabs;
+                    corner-radius = mkIfNotNull l.tab-indicator.corner-radius;
+                    active-color = mkIfNotNull l.tab-indicator.active-color;
+                    inactive-color = mkIfNotNull l.tab-indicator.inactive-color;
+                    urgent-color = mkIfNotNull l.tab-indicator.urgent-color;
+                    active-gradient = mkIf (!isNull l.tab-indicator.active-gradient) (
+                        renderGradient l.tab-indicator.active-gradient
+                    );
+                    inactive-gradient = mkIf (!isNull l.tab-indicator.inactive-gradient) (
+                        renderGradient l.tab-indicator.inactive-gradient
+                    );
+                    urgent-gradient = mkIf (!isNull l.tab-indicator.urgent-gradient) (
+                        renderGradient l.tab-indicator.urgent-gradient
+                    );
+                }
             );
-            urgent-gradient = mkIf (!isNull l.border.urgent-gradient) (renderGradient l.border.urgent-gradient);
-        });
-        shadow = mkIfNotEmpty (renderSub l.shadow {
-            softness = mkIfNotNull l.shadow.softness;
-            spread = mkIfNotNull l.shadow.spread;
-            offset._props = mkIfNotNull l.shadow.offset;
-            draw-behind-window = l.shadow.draw-behind-window;
-            color = mkIfNotNull l.shadow.color;
-            inactive-color = mkIfNotNull l.shadow.inactive-color;
-        });
-        tab-indicator = mkIfNotEmpty (renderSub l.tab-indicator {
-            hide-when-single-tab = mkIf l.tab-indicator.hide-when-single-tab [ ];
-            place-within-column = mkIf l.tab-indicator.place-within-column [ ];
-            gap = mkIfNotNull l.tab-indicator.gap;
-            width = mkIfNotNull l.tab-indicator.width;
-            length._props.total-proportion = mkIfNotNull l.tab-indicator.length;
-            position = mkIfNotNull l.tab-indicator.position;
-            gaps-between-tabs = mkIfNotNull l.tab-indicator.gaps-between-tabs;
-            corner-radius = mkIfNotNull l.tab-indicator.corner-radius;
-            active-color = mkIfNotNull l.tab-indicator.active-color;
-            inactive-color = mkIfNotNull l.tab-indicator.inactive-color;
-            urgent-color = mkIfNotNull l.tab-indicator.urgent-color;
-            active-gradient = mkIf (!isNull l.tab-indicator.active-gradient) (
-                renderGradient l.tab-indicator.active-gradient
+            insert-hint = mkIfNotEmpty (
+                renderSub l.insert-hint {
+                    color = mkIfNotNull l.insert-hint.color;
+                    gradient = mkIf (!isNull l.insert-hint.gradient) (renderGradient l.insert-hint.gradient);
+                }
             );
-            inactive-gradient = mkIf (!isNull l.tab-indicator.inactive-gradient) (
-                renderGradient l.tab-indicator.inactive-gradient
-            );
-            urgent-gradient = mkIf (!isNull l.tab-indicator.urgent-gradient) (
-                renderGradient l.tab-indicator.urgent-gradient
-            );
-        });
-        insert-hint = mkIfNotEmpty (renderSub l.insert-hint {
-            color = mkIfNotNull l.insert-hint.color;
-            gradient = mkIf (!isNull l.insert-hint.gradient) (renderGradient l.insert-hint.gradient);
-        });
-        struts = mkIfNotEmpty {
-            left = mkIfNotNull l.struts.left;
-            right = mkIfNotNull l.struts.right;
-            top = mkIfNotNull l.struts.top;
-            bottom = mkIfNotNull l.struts.bottom;
+            struts = mkIfNotEmpty {
+                left = mkIfNotNull l.struts.left;
+                right = mkIfNotNull l.struts.right;
+                top = mkIfNotNull l.struts.top;
+                bottom = mkIfNotNull l.struts.bottom;
+            };
         };
-    };
-    
+
 }
