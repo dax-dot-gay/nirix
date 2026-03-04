@@ -181,7 +181,7 @@ rec {
                 }
                 ''
                     grep -v '^include\s' $configPath > config-without-includes.kdl
-                    cp config-without-includes.kdl /home/itec/config-without-includes.kdl
+                    cat config-without-includes.kdl
                     niri validate -c config-without-includes.kdl
                     cp $configPath $out
                 ''
