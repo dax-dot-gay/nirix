@@ -35,8 +35,8 @@ in
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.listOf matcherType) [];
-                        exclude = mkOptDefault (types.listOf matcherType) [];
+                        match = mkOptDefault (types.listOf matcherType) [ ];
+                        exclude = mkOptDefault (types.listOf matcherType) [ ];
                         opacity = mkNullOr types.float;
                         block-out-from = mkNullOr (
                             types.enum [
@@ -63,31 +63,38 @@ in
                 }
             )
         );
-        default = {};
+        default = { };
     };
     config.wayland.windowManager.niri._raw_settings = {
         layer-rule = mkIfNotEmpty (
             map (rule: {
                 _children = concatLists [
-                    map
-                    ((matcher: renderMatcher "match" matcher) rule.match)
-                    map
-                    ((matcher: renderMatcher "exclude" matcher) rule.exclude)
+                    (map (matcher: renderMatcher "match" matcher) rule.match)
+                    (map (matcher: renderMatcher "exclude" matcher) rule.exclude)
                     (mkChild rule "opacity")
                     (mkChild rule "block-out-from")
                     (mkChild rule "geometry-corner-radius")
                     (mkChild rule "place-within-backdrop")
                     (mkChild rule "baba-is-float")
                     (optional (!isNull rule.shadow.enable) (
-                        if rule.shadow.enable then { shadow = with rule.shadow; {
-                            on = [ ];
-                            offset = mkIf (!isNull offset) {_props = offset;};
-                            softness = mkIfNotNull softness;
-                            spread = mkIfNotNull spread;
-                            draw-behind-window = mkIfNotNull draw-behind-window;
-                            color = mkIfNotNull color;
-                            inactive-color = mkIfNotNull inactive-color;
-                        }; } else { shadow = {off = [ ];}; }
+                        if rule.shadow.enable then
+                            {
+                                shadow = with rule.shadow; {
+                                    on = [ ];
+                                    offset = mkIf (!isNull offset) { _props = offset; };
+                                    softness = mkIfNotNull softness;
+                                    spread = mkIfNotNull spread;
+                                    draw-behind-window = mkIfNotNull draw-behind-window;
+                                    color = mkIfNotNull color;
+                                    inactive-color = mkIfNotNull inactive-color;
+                                };
+                            }
+                        else
+                            {
+                                shadow = {
+                                    off = [ ];
+                                };
+                            }
                     ))
                 ];
             }) (attrValues cfg)
