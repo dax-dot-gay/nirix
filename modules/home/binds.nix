@@ -288,8 +288,11 @@ let
             ) opts.hotkey-overlay-title;
             allow-inhibiting = mkIf (!opts.allow-inhibiting) opts.allow-inhibiting;
         };
-        ${action}._props = mkIf (isAttrs opts.action.${action}) opts.action.${action};
-        ${action}._args = mkIf (isList opts.action.${action}) opts.action.${action};
+        ${action} = if isAttrs opts.action.${action} then {
+            _props = opts.action.${action};
+        } else if isList opts.action.${action} then {
+            _args = opts.action.${action};
+        } else {};
     };
 in
 {
