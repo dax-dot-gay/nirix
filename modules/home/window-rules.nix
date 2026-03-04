@@ -213,14 +213,14 @@ in
                                 (mkChild dynamic "min-height")
                                 (mkChild dynamic "max-height")
                                 (optional (
-                                    !isNull dynamic.default-floating-position {
+                                    !isNull dynamic.default-floating-position) {
                                         default-floating-position._props = {
                                             x = dynamic.default-floating-position.x;
                                             y = dynamic.default-floating-position.y;
                                             relative-to = mkIfNotNull dynamic.default-floating-position.relative-to;
                                         };
                                     }
-                                ))
+                                )
 
                                 (optional (!isNull dynamic.focus-ring.enable) (
                                     if dynamic.focus-ring.enable then { on = [ ]; } else { off = [ ]; }
