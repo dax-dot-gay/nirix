@@ -10,15 +10,17 @@ let
     matcherType = types.submodule (
         { ... }:
         {
-            title = mkNullOr types.str;
-            app-id = mkNullOr types.str;
-            is-active = mkNullOr types.bool;
-            is-focused = mkNullOr types.bool;
-            is-active-in-column = mkNullOr types.bool;
-            is-floating = mkNullOr types.bool;
-            is-window-cast-target = mkNullOr types.bool;
-            is-urgent = mkNullOr types.bool;
-            at-startup = mkNullOr types.bool;
+            options = {
+                title = mkNullOr types.str;
+                app-id = mkNullOr types.str;
+                is-active = mkNullOr types.bool;
+                is-focused = mkNullOr types.bool;
+                is-active-in-column = mkNullOr types.bool;
+                is-floating = mkNullOr types.bool;
+                is-window-cast-target = mkNullOr types.bool;
+                is-urgent = mkNullOr types.bool;
+                at-startup = mkNullOr types.bool;
+            };
         }
     );
 
@@ -55,8 +57,8 @@ in
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.attrsOf matcherType) {};
-                        exclude = mkOptDefault (types.attrsOf matcherType) {};
+                        match = mkOptDefault (types.attrsOf matcherType) { };
+                        exclude = mkOptDefault (types.attrsOf matcherType) { };
                         on-open = {
                             default-column-width = mkNullOr sizeType;
                             default-window-height = mkNullOr sizeType;
@@ -175,7 +177,7 @@ in
                 }
             )
         );
-        default = {};
+        default = { };
     };
     config.wayland.windowManager.niri._raw_settings = {
         window-rule = mkIfNotEmpty (

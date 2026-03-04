@@ -10,8 +10,10 @@ let
     matcherType = types.submodule (
         { ... }:
         {
-            namespace = mkNullOr types.str;
-            at-startup = mkNullOr types.bool;
+            options = {
+                namespace = mkNullOr types.str;
+                at-startup = mkNullOr types.bool;
+            };
         }
     );
 
@@ -36,8 +38,8 @@ in
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.attrsOf matcherType) {};
-                        exclude = mkOptDefault (types.attrsOf matcherType) {};
+                        match = mkOptDefault (types.attrsOf matcherType) { };
+                        exclude = mkOptDefault (types.attrsOf matcherType) { };
                         opacity = mkNullOr types.float;
                         block-out-from = mkNullOr (
                             types.enum [
@@ -64,7 +66,7 @@ in
                 }
             )
         );
-        default = {};
+        default = { };
     };
     config.wayland.windowManager.niri._raw_settings = {
         layer-rule = mkIfNotEmpty (
