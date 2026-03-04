@@ -23,7 +23,14 @@ let
         { ... }:
         {
             options = {
-                quit = mkAction { skip-confirmation = mkBool false; };
+                #quit = mkAction { skip-confirmation = mkBool false; };
+                quit = mkOption {
+                    type = types.submodule ({...}: {
+                        options = {
+                            skip-confirmation = mkBool false;
+                        };
+                    });
+                };
                 /*spawn = mkAction {
                     allow-when-locked = mkBool false;
                     args = mkOption { type = types.listOf types.str; };
@@ -177,7 +184,7 @@ let
                 toggle-window-urgent = mkGenericAction;
                 toggle-windowed-fullscreen = mkGenericAction;
                 unset-window-urgent = mkGenericAction;*/
-                unset-workspace-name = mkGenericAction;
+                #unset-workspace-name = mkGenericAction;
             };
         }
     );
