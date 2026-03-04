@@ -50,7 +50,7 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.window-rules = mkOption {
-        type = types.attrsOf (
+        type = types.listOf (
             types.submodule (
                 { ... }:
                 {
@@ -175,8 +175,7 @@ in
                 }
             )
         );
-        default = { };
-        description = "An attrset (the keys aren't used, just a hack for nixd) of window rules";
+        default = [ ];
     };
     config.wayland.windowManager.niri._raw_settings = {
         window-rule = mkIfNotEmpty (
@@ -184,84 +183,33 @@ in
                 _children = concatLists (
                     with rule;
                     [
-                        map
-                        (matcher: renderMatcher "match" matcher)
-                        match
-                        map
-                        (matcher: renderMatcher "exclude" matcher)
-                        exclude
-                        mkChild
-                        on-open
-                        "default-column-width"
-                        mkChild
-                        on-open
-                        "default-window-height"
-                        mkChild
-                        on-open
-                        "open-on-output"
-                        mkChild
-                        on-open
-                        "open-on-workspace"
-                        mkChild
-                        on-open
-                        "open-maximized"
-                        mkChild
-                        on-open
-                        "open-maximized-to-edges"
-                        mkChild
-                        on-open
-                        "open-fullscreen"
-                        mkChild
-                        on-open
-                        "open-floating"
-                        mkChild
-                        on-open
-                        "open-focused"
+                        (map (matcher: renderMatcher "match" matcher) match)
+                        (map (matcher: renderMatcher "exclude" matcher) exclude)
+                        (mkChild on-open "default-column-width")
+                        (mkChild on-open "default-window-height")
+                        (mkChild on-open "open-on-output")
+                        (mkChild on-open "open-on-workspace")
+                        (mkChild on-open "open-maximized")
+                        (mkChild on-open "open-maximized-to-edges")
+                        (mkChild on-open "open-fullscreen")
+                        (mkChild on-open "open-floating")
+                        (mkChild on-open "open-focused")
 
-                        mkChild
-                        dynamic
-                        "draw-border-with-background"
-                        mkChild
-                        dynamic
-                        "opacity"
-                        mkChild
-                        dynamic
-                        "block-out-from"
-                        mkChild
-                        dynamic
-                        "variable-refresh-rate"
-                        mkChild
-                        dynamic
-                        "default-column-display"
-                        mkChild
-                        dynamic
-                        "scroll-factor"
-                        mkChild
-                        dynamic
-                        "geometry-corner-radius"
-                        mkChild
-                        dynamic
-                        "clip-to-geometry"
-                        mkChild
-                        dynamic
-                        "tiled-state"
-                        mkChild
-                        dynamic
-                        "baba-is-float"
-                        mkChild
-                        dynamic
-                        "min-width"
-                        mkChild
-                        dynamic
-                        "max-width"
-                        mkChild
-                        dynamic
-                        "min-height"
-                        mkChild
-                        dynamic
-                        "max-height"
-                        optional
-                        (
+                        (mkChild dynamic "draw-border-with-background")
+                        (mkChild dynamic "opacity")
+                        (mkChild dynamic "block-out-from")
+                        (mkChild dynamic "variable-refresh-rate")
+                        (mkChild dynamic "default-column-display")
+                        (mkChild dynamic "scroll-factor")
+                        (mkChild dynamic "geometry-corner-radius")
+                        (mkChild dynamic "clip-to-geometry")
+                        (mkChild dynamic "tiled-state")
+                        (mkChild dynamic "baba-is-float")
+                        (mkChild dynamic "min-width")
+                        (mkChild dynamic "max-width")
+                        (mkChild dynamic "min-height")
+                        (mkChild dynamic "max-height")
+                        (optional (
                             !isNull dynamic.default-floating-position {
                                 default-floating-position._props = {
                                     x = dynamic.default-floating-position.x;
@@ -269,161 +217,60 @@ in
                                     relative-to = mkIfNotNull dynamic.default-floating-position.relative-to;
                                 };
                             }
-                        )
+                        ))
 
-                        optional
-                        (!isNull dynamic.focus-ring.enable)
-                        (if dynamic.focus-ring.enable then { on = [ ]; } else { off = [ ]; })
-                        mkSChild
-                        dynamic
-                        "focus-ring"
-                        "width"
-                        mkSChild
-                        dynamic
-                        "focus-ring"
-                        "active-color"
-                        mkSChild
-                        dynamic
-                        "focus-ring"
-                        "inactive-color"
-                        mkSChild
-                        dynamic
-                        "focus-ring"
-                        "urgent-color"
-                        mkSGradient
-                        dynamic
-                        "focus-ring"
-                        "active-gradient"
-                        mkSGradient
-                        dynamic
-                        "focus-ring"
-                        "inactive-gradient"
-                        mkSGradient
-                        dynamic
-                        "focus-ring"
-                        "urgent-gradient"
+                        (optional (!isNull dynamic.focus-ring.enable) (
+                            if dynamic.focus-ring.enable then { on = [ ]; } else { off = [ ]; }
+                        ))
+                        (mkSChild dynamic "focus-ring" "width")
+                        (mkSChild dynamic "focus-ring" "active-color")
+                        (mkSChild dynamic "focus-ring" "inactive-color")
+                        (mkSChild dynamic "focus-ring" "urgent-color")
+                        (mkSGradient dynamic "focus-ring" "active-gradient")
+                        (mkSGradient dynamic "focus-ring" "inactive-gradient")
+                        (mkSGradient dynamic "focus-ring" "urgent-gradient")
 
-                        optional
-                        (!isNull dynamic.border.enable)
-                        (if dynamic.border.enable then { on = [ ]; } else { off = [ ]; })
-                        mkSChild
-                        dynamic
-                        "border"
-                        "width"
-                        mkSChild
-                        dynamic
-                        "border"
-                        "active-color"
-                        mkSChild
-                        dynamic
-                        "border"
-                        "inactive-color"
-                        mkSChild
-                        dynamic
-                        "border"
-                        "urgent-color"
-                        mkSGradient
-                        dynamic
-                        "border"
-                        "active-gradient"
-                        mkSGradient
-                        dynamic
-                        "border"
-                        "inactive-gradient"
-                        mkSGradient
-                        dynamic
-                        "border"
-                        "urgent-gradient"
+                        (optional (!isNull dynamic.border.enable) (
+                            if dynamic.border.enable then { on = [ ]; } else { off = [ ]; }
+                        ))
+                        (mkSChild dynamic "border" "width")
+                        (mkSChild dynamic "border" "active-color")
+                        (mkSChild dynamic "border" "inactive-color")
+                        (mkSChild dynamic "border" "urgent-color")
+                        (mkSGradient dynamic "border" "active-gradient")
+                        (mkSGradient dynamic "border" "inactive-gradient")
+                        (mkSGradient dynamic "border" "urgent-gradient")
 
-                        optional
-                        (!isNull dynamic.shadow.enable)
-                        (if dynamic.shadow.enable then { on = [ ]; } else { off = [ ]; })
-                        optional
-                        (!isNull dynamic.shadow.offset)
-                        { offset._props = dynamic.shadow.offset; }
-                        mkSChild
-                        dynamic
-                        "shadow"
-                        "softness"
-                        mkSChild
-                        dynamic
-                        "shadow"
-                        "spread"
-                        mkSChild
-                        dynamic
-                        "shadow"
-                        "draw-behind-window"
-                        mkSChild
-                        dynamic
-                        "shadow"
-                        "color"
-                        mkSChild
-                        dynamic
-                        "shadow"
-                        "inactive-color"
+                        (optional (!isNull dynamic.shadow.enable) (
+                            if dynamic.shadow.enable then { on = [ ]; } else { off = [ ]; }
+                        ))
+                        (optional (!isNull dynamic.shadow.offset) { offset._props = dynamic.shadow.offset; })
+                        (mkSChild dynamic "shadow" "softness")
+                        (mkSChild dynamic "shadow" "spread")
+                        (mkSChild dynamic "shadow" "draw-behind-window")
+                        (mkSChild dynamic "shadow" "color")
+                        (mkSChild dynamic "shadow" "inactive-color")
 
-                        optional
-                        (!isNull dynamic.tab-indicator.enable)
-                        (if dynamic.tab-indicator.enable then { on = [ ]; } else { off = [ ]; })
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "hide-when-single-tab"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "place-within-column"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "gap"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "width"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "length"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "position"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "gaps-between-tabs"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "corner-radius"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "active-color"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "inactive-color"
-                        mkSChild
-                        dynamic
-                        "tab-indicator"
-                        "urgent-color"
-                        mkSGradient
-                        dynamic
-                        "tab-indicator"
-                        "active-gradient"
-                        mkSGradient
-                        dynamic
-                        "tab-indicator"
-                        "inactive-gradient"
-                        mkSGradient
-                        dynamic
-                        "tab-indicator"
-                        "urgent-gradient"
+                        (optional (!isNull dynamic.tab-indicator.enable) (
+                            if dynamic.tab-indicator.enable then { on = [ ]; } else { off = [ ]; }
+                        ))
+                        (mkSChild dynamic "tab-indicator" "hide-when-single-tab")
+                        (mkSChild dynamic "tab-indicator" "place-within-column")
+                        (mkSChild dynamic "tab-indicator" "gap")
+                        (mkSChild dynamic "tab-indicator" "width")
+                        (mkSChild dynamic "tab-indicator" "length")
+                        (mkSChild dynamic "tab-indicator" "position")
+                        (mkSChild dynamic "tab-indicator" "gaps-between-tabs")
+                        (mkSChild dynamic "tab-indicator" "corner-radius")
+                        (mkSChild dynamic "tab-indicator" "active-color")
+                        (mkSChild dynamic "tab-indicator" "inactive-color")
+                        (mkSChild dynamic "tab-indicator" "urgent-color")
+                        (mkSGradient dynamic "tab-indicator" "active-gradient")
+                        (mkSGradient dynamic "tab-indicator" "inactive-gradient")
+                        (mkSGradient dynamic "tab-indicator" "urgent-gradient")
                     ]
                 );
-            }) (attrValues cfg)
+            }) cfg
         );
     };
 }

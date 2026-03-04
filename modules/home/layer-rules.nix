@@ -31,7 +31,7 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.layer-rules = mkOption {
-        type = types.attrsOf (
+        type = types.listOf (
             types.submodule (
                 { ... }:
                 {
@@ -64,62 +64,32 @@ in
                 }
             )
         );
-        default = { };
-        description = "An attrset (the keys aren't used, just a hack for nixd) of layer rules";
+        default = [ ];
     };
     config.wayland.windowManager.niri._raw_settings = {
         layer-rule = mkIfNotEmpty (
             map (rule: {
                 _children = concatLists [
                     map
-                    (matcher: renderMatcher "match" matcher)
-                    rule.match
+                    ((matcher: renderMatcher "match" matcher) rule.match)
                     map
-                    (matcher: renderMatcher "exclude" matcher)
-                    rule.exclude
-                    mkChild
-                    rule
-                    "opacity"
-                    mkChild
-                    rule
-                    "block-out-from"
-                    mkChild
-                    rule
-                    "geometry-corner-radius"
-                    mkChild
-                    rule
-                    "place-within-backdrop"
-                    mkChild
-                    rule
-                    "baba-is-float"
-                    optional
-                    (!isNull rule.shadow.enable)
-                    (if rule.shadow.enable then { on = [ ]; } else { off = [ ]; })
-                    optional
-                    (!isNull rule.shadow.offset)
-                    { offset._props = rule.shadow.offset; }
-                    mkSChild
-                    rule
-                    "shadow"
-                    "softness"
-                    mkSChild
-                    rule
-                    "shadow"
-                    "spread"
-                    mkSChild
-                    rule
-                    "shadow"
-                    "draw-behind-window"
-                    mkSChild
-                    rule
-                    "shadow"
-                    "color"
-                    mkSChild
-                    rule
-                    "shadow"
-                    "inactive-color"
+                    ((matcher: renderMatcher "exclude" matcher) rule.exclude)
+                    (mkChild rule "opacity")
+                    (mkChild rule "block-out-from")
+                    (mkChild rule "geometry-corner-radius")
+                    (mkChild rule "place-within-backdrop")
+                    (mkChild rule "baba-is-float")
+                    (optional (!isNull rule.shadow.enable) (
+                        if rule.shadow.enable then { on = [ ]; } else { off = [ ]; }
+                    ))
+                    (optional (!isNull rule.shadow.offset) { offset._props = rule.shadow.offset; })
+                    (mkSChild rule "shadow" "softness")
+                    (mkSChild rule "shadow" "spread")
+                    (mkSChild rule "shadow" "draw-behind-window")
+                    (mkSChild rule "shadow" "color")
+                    (mkSChild rule "shadow" "inactive-color")
                 ];
-            }) (attrValues cfg)
+            }) cfg
         );
     };
 }
