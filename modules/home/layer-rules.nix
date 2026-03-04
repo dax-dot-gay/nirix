@@ -27,9 +27,6 @@ let
     };
 
     mkChild = value: key: optional (!isNull value.${key}) { ${key} = value.${key}; };
-    mkSChild =
-        root: block: key:
-        optional (!isNull root.${block}.${key}) { ${block}.${key} = root.${block}.${key}; };
 in
 {
     options.wayland.windowManager.niri.settings.layer-rules = mkOption {
@@ -82,14 +79,16 @@ in
                     (mkChild rule "place-within-backdrop")
                     (mkChild rule "baba-is-float")
                     (optional (!isNull rule.shadow.enable) (
-                        if rule.shadow.enable then { on = [ ]; } else { off = [ ]; }
+                        if rule.shadow.enable then { shadow = with rule.shadow; {
+                            on = [ ];
+                            offset = mkIf (!isNull offset) {_props = offset;};
+                            softness = mkIfNotNull softness;
+                            spread = mkIfNotNull spread;
+                            draw-behind-window = mkIfNotNull draw-behind-window;
+                            color = mkIfNotNull color;
+                            inactive-color = mkIfNotNull inactive-color;
+                        }; } else { shadow = {off = [ ];}; }
                     ))
-                    (optional (!isNull rule.shadow.offset) { offset._props = rule.shadow.offset; })
-                    (mkSChild rule "shadow" "softness")
-                    (mkSChild rule "shadow" "spread")
-                    (mkSChild rule "shadow" "draw-behind-window")
-                    (mkSChild rule "shadow" "color")
-                    (mkSChild rule "shadow" "inactive-color")
                 ];
             }) (attrValues cfg)
         );

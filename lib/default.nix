@@ -181,6 +181,7 @@ rec {
                 }
                 ''
                     grep -v '^include\s' $configPath > config-without-includes.kdl
+                    cat config-without-includes.kdl
                     niri validate -c config-without-includes.kdl
                     cp $configPath $out
                 ''

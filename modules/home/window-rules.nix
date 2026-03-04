@@ -43,12 +43,6 @@ let
     };
 
     mkChild = value: key: optional (!isNull value.${key}) { ${key} = value.${key}; };
-    mkSChild =
-        root: block: key:
-        optional (!isNull root.${block}.${key}) { ${block}.${key} = root.${block}.${key}; };
-    mkSGradient =
-        root: block: key:
-        optional (!isNull root.${block}.${key}) { ${block}.${key} = renderGradient root.${block}.${key}; };
 in
 {
     options.wayland.windowManager.niri.settings.window-rules = mkOption {
@@ -223,54 +217,62 @@ in
                                 )
 
                                 (optional (!isNull dynamic.focus-ring.enable) (
-                                    if dynamic.focus-ring.enable then { on = [ ]; } else { off = [ ]; }
+                                    if dynamic.focus-ring.enable then { focus-ring = with dynamic.focus-ring; {
+                                        on = [];
+                                        width = mkIfNotNull width;
+                                        active-color = mkIfNotNull active-color;
+                                        inactive-color = mkIfNotNull inactive-color;
+                                        urgent-color = mkIfNotNull urgent-color;
+                                        active-gradient = mkIf (!isNull active-gradient) (renderGradient active-gradient);
+                                        inactive-gradient = mkIf (!isNull inactive-gradient) (renderGradient inactive-gradient);
+                                        urgent-gradient = mkIf (!isNull urgent-gradient) (renderGradient urgent-gradient);
+                                    }; } else { focus-ring = {off = [ ];}; }
                                 ))
-                                (mkSChild dynamic "focus-ring" "width")
-                                (mkSChild dynamic "focus-ring" "active-color")
-                                (mkSChild dynamic "focus-ring" "inactive-color")
-                                (mkSChild dynamic "focus-ring" "urgent-color")
-                                (mkSGradient dynamic "focus-ring" "active-gradient")
-                                (mkSGradient dynamic "focus-ring" "inactive-gradient")
-                                (mkSGradient dynamic "focus-ring" "urgent-gradient")
 
                                 (optional (!isNull dynamic.border.enable) (
-                                    if dynamic.border.enable then { on = [ ]; } else { off = [ ]; }
+                                    if dynamic.border.enable then { border = with dynamic.border; {
+                                        on = [];
+                                        width = mkIfNotNull width;
+                                        active-color = mkIfNotNull active-color;
+                                        inactive-color = mkIfNotNull inactive-color;
+                                        urgent-color = mkIfNotNull urgent-color;
+                                        active-gradient = mkIf (!isNull active-gradient) (renderGradient active-gradient);
+                                        inactive-gradient = mkIf (!isNull inactive-gradient) (renderGradient inactive-gradient);
+                                        urgent-gradient = mkIf (!isNull urgent-gradient) (renderGradient urgent-gradient);
+                                    }; } else { border = {off = [ ];}; }
                                 ))
-                                (mkSChild dynamic "border" "width")
-                                (mkSChild dynamic "border" "active-color")
-                                (mkSChild dynamic "border" "inactive-color")
-                                (mkSChild dynamic "border" "urgent-color")
-                                (mkSGradient dynamic "border" "active-gradient")
-                                (mkSGradient dynamic "border" "inactive-gradient")
-                                (mkSGradient dynamic "border" "urgent-gradient")
 
                                 (optional (!isNull dynamic.shadow.enable) (
-                                    if dynamic.shadow.enable then { on = [ ]; } else { off = [ ]; }
+                                    if dynamic.shadow.enable then { shadow = with dynamic.shadow; {
+                                        on = [ ];
+                                        offset = mkIf (!isNull offset) {_props = offset;};
+                                        softness = mkIfNotNull softness;
+                                        spread = mkIfNotNull spread;
+                                        draw-behind-window = mkIfNotNull draw-behind-window;
+                                        color = mkIfNotNull color;
+                                        inactive-color = mkIfNotNull inactive-color;
+                                    }; } else { shadow = {off = [ ];}; }
                                 ))
-                                (optional (!isNull dynamic.shadow.offset) { offset._props = dynamic.shadow.offset; })
-                                (mkSChild dynamic "shadow" "softness")
-                                (mkSChild dynamic "shadow" "spread")
-                                (mkSChild dynamic "shadow" "draw-behind-window")
-                                (mkSChild dynamic "shadow" "color")
-                                (mkSChild dynamic "shadow" "inactive-color")
 
                                 (optional (!isNull dynamic.tab-indicator.enable) (
-                                    if dynamic.tab-indicator.enable then { on = [ ]; } else { off = [ ]; }
+                                    if dynamic.tab-indicator.enable then { tab-indicator = with dynamic.tab-indicator; {
+                                        on = [ ];
+                                        hide-when-single-tab = mkIfNotNull hide-when-single-tab;
+                                        place-within-column = mkIfNotNull place-within-column;
+                                        gap = mkIfNotNull gap;
+                                        width = mkIfNotNull width;
+                                        length = mkIfNotNull length;
+                                        position = mkIfNotNull position;
+                                        gaps-between-tabs = mkIfNotNull gaps-between-tabs;
+                                        corner-radius = mkIfNotNull corner-radius;
+                                        active-color = mkIfNotNull active-color;
+                                        inactive-color = mkIfNotNull inactive-color;
+                                        urgent-color = mkIfNotNull urgent-color;
+                                        active-gradient = mkIf (!isNull active-gradient) (renderGradient active-gradient);
+                                        inactive-gradient = mkIf (!isNull inactive-gradient) (renderGradient inactive-gradient);
+                                        urgent-gradient = mkIf (!isNull urgent-gradient) (renderGradient urgent-gradient);
+                                    }; } else { tab-indicator = {off = [ ];}; }
                                 ))
-                                (mkSChild dynamic "tab-indicator" "hide-when-single-tab")
-                                (mkSChild dynamic "tab-indicator" "place-within-column")
-                                (mkSChild dynamic "tab-indicator" "gap")
-                                (mkSChild dynamic "tab-indicator" "width")
-                                (mkSChild dynamic "tab-indicator" "length")
-                                (mkSChild dynamic "tab-indicator" "position")
-                                (mkSChild dynamic "tab-indicator" "gaps-between-tabs")
-                                (mkSChild dynamic "tab-indicator" "corner-radius")
-                                (mkSChild dynamic "tab-indicator" "active-color")
-                                (mkSChild dynamic "tab-indicator" "inactive-color")
-                                (mkSChild dynamic "tab-indicator" "urgent-color")
-                                (mkSGradient dynamic "tab-indicator" "active-gradient")
-                                (mkSGradient dynamic "tab-indicator" "inactive-gradient")
-                                (mkSGradient dynamic "tab-indicator" "urgent-gradient")
                             ];
 
                 }
