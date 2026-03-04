@@ -59,7 +59,7 @@ in
                     options = {
                         match = mkOptDefault (types.listOf matcherType) [];
                         exclude = mkOptDefault (types.listOf matcherType) [];
-                        on-open = {
+                        on-open = optionalBlock {
                             default-column-width = mkNullOr sizeType;
                             default-window-height = mkNullOr sizeType;
                             open-on-output = mkNullOr types.str;
@@ -70,7 +70,7 @@ in
                             open-floating = mkNullOr types.bool;
                             open-focused = mkNUllOr types.bool;
                         };
-                        dynamic = {
+                        dynamic = optionalBlock {
                             draw-border-with-background = mkNullOr types.bool;
                             opacity = mkNullOr types.float;
                             block-out-from = mkNullOr (
