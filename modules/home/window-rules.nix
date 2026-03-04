@@ -46,7 +46,7 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.window-rules = mkOption {
-        type = types.listOf (
+        type = types.attrsOf (
             types.submodule (
                 { ... }:
                 {
@@ -152,10 +152,11 @@ in
                 }
             )
         );
-        default = [ ];
+        default = {};
+        description = "An attrset (the keys aren't used, just a hack for nixd) of window rules";
     };
     config.wayland.windowManager.niri._raw_settings = {
-        window-rule = mkIf ((length cfg) > 0) (map (rule: {
+        window-rule = mkIfNotEmpty (map (rule: {
             _children = concatLists (with rule; [
                 map (matcher: renderMatcher "match" matcher) match
                 map (matcher: renderMatcher "exclude" matcher) exclude
@@ -233,6 +234,6 @@ in
                 mkSGradient dynamic "tab-indicator" "inactive-gradient"
                 mkSGradient dynamic "tab-indicator" "urgent-gradient"
             ]);
-        }) cfg);
+        }) (attrValues cfg));
     };
 }
