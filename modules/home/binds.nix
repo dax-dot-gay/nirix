@@ -24,7 +24,7 @@ let
         {
             options = {
                 quit = mkAction { skip-confirmation = mkBool false; };
-                spawn = mkAction {
+                /*spawn = mkAction {
                     allow-when-locked = mkBool false;
                     args = mkOption { type = types.listOf types.str; };
                 };
@@ -176,7 +176,7 @@ let
                 toggle-window-rule-opacity = mkGenericAction;
                 toggle-window-urgent = mkGenericAction;
                 toggle-windowed-fullscreen = mkGenericAction;
-                unset-window-urgent = mkGenericAction;
+                unset-window-urgent = mkGenericAction;*/
                 unset-workspace-name = mkGenericAction;
             };
         }
@@ -312,13 +312,6 @@ in
             )
         );
         default = {
-            "Mod+T" = {
-                action = {
-                    spawn = {
-                        args = [ "ghostty" ];
-                    };
-                };
-            };
         };
     };
     config.wayland.windowManager.niri._raw_settings = {
