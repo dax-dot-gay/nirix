@@ -33,13 +33,13 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.layer-rules = mkOption {
-        type = types.attrsOf (
+        type = types.listOf (
             types.submodule (
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.attrsOf matcherType) { };
-                        exclude = mkOptDefault (types.attrsOf matcherType) { };
+                        match = mkOptDefault (types.listOf matcherType) [];
+                        exclude = mkOptDefault (types.listOf matcherType) [];
                         opacity = mkNullOr types.float;
                         block-out-from = mkNullOr (
                             types.enum [
@@ -66,16 +66,16 @@ in
                 }
             )
         );
-        default = { };
+        default = [];
     };
     config.wayland.windowManager.niri._raw_settings = {
         layer-rule = mkIfNotEmpty (
             map (rule: {
                 _children = concatLists [
                     map
-                    ((matcher: renderMatcher "match" matcher) (attrValues rule.match))
+                    ((matcher: renderMatcher "match" matcher) rule.match)
                     map
-                    ((matcher: renderMatcher "exclude" matcher) (attrValues rule.exclude))
+                    ((matcher: renderMatcher "exclude" matcher) rule.exclude)
                     (mkChild rule "opacity")
                     (mkChild rule "block-out-from")
                     (mkChild rule "geometry-corner-radius")
@@ -91,7 +91,7 @@ in
                     (mkSChild rule "shadow" "color")
                     (mkSChild rule "shadow" "inactive-color")
                 ];
-            }) (attrValues cfg)
+            }) cfg
         );
     };
 }

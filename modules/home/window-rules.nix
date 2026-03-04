@@ -52,13 +52,13 @@ let
 in
 {
     options.wayland.windowManager.niri.settings.window-rules = mkOption {
-        type = types.attrsOf (
+        type = types.listOf (
             types.submodule (
                 { ... }:
                 {
                     options = {
-                        match = mkOptDefault (types.attrsOf matcherType) { };
-                        exclude = mkOptDefault (types.attrsOf matcherType) { };
+                        match = mkOptDefault (types.listOf matcherType) [];
+                        exclude = mkOptDefault (types.listOf matcherType) [];
                         on-open = {
                             default-column-width = mkNullOr sizeType;
                             default-window-height = mkNullOr sizeType;
@@ -177,7 +177,7 @@ in
                 }
             )
         );
-        default = { };
+        default = [];
     };
     config.wayland.windowManager.niri._raw_settings = {
         window-rule = mkIfNotEmpty (
@@ -185,8 +185,8 @@ in
                 _children = concatLists (
                     with rule;
                     [
-                        (map (matcher: renderMatcher "match" matcher) (attrValues match))
-                        (map (matcher: renderMatcher "exclude" matcher) (attrValues exclude))
+                        (map (matcher: renderMatcher "match" matcher) match)
+                        (map (matcher: renderMatcher "exclude" matcher) exclude)
                         (mkChild on-open "default-column-width")
                         (mkChild on-open "default-window-height")
                         (mkChild on-open "open-on-output")
@@ -272,7 +272,7 @@ in
                         (mkSGradient dynamic "tab-indicator" "urgent-gradient")
                     ]
                 );
-            }) (atteValues cfg)
+            }) cfg
         );
     };
 }
