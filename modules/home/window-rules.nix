@@ -68,7 +68,7 @@ in
                             open-maximized-to-edges = mkNullOr types.bool;
                             open-fullscreen = mkNullOr types.bool;
                             open-floating = mkNullOr types.bool;
-                            open-focused = mkNUllOr types.bool;
+                            open-focused = mkNullOr types.bool;
                         };
                         dynamic = optionalBlock {
                             draw-border-with-background = mkNullOr types.bool;
