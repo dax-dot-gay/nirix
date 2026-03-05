@@ -59,8 +59,7 @@ in
                             );
                             default = [ "top-left" ];
                         };
-                        layout = optionalBlock (mkLayoutOptions {});
-                        raw_layout = mkNullOr types.attrs;
+                        layout = mkNullOr types.attrs;
                     };
                 }
             )
@@ -89,9 +88,7 @@ in
                     }
                 else
                     { off = [ ]; };
-            layout = mkIf ((!isNull value.layout) || (!isNull value.raw_layout)) (
-                if !isNull value.raw_layout then value.raw_layout else (renderLayout value.layout)
-            );
+            layout = mkIfNotNull value.layout;
         }) cfg);
     };
 }
