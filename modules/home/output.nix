@@ -57,7 +57,7 @@ in
                                     "bottom-right"
                                 ]
                             );
-                            default = [ "top-left" ];
+                            default = [  ];
                         };
                         layout = mkNullOr types.attrs;
                     };
@@ -78,16 +78,12 @@ in
             );
             focus-at-startup = mkIf value.focus-at-startup [ ];
             backdrop-color = mkIfNotNull value.backdrop-color;
-            hot-corners =
-                if ((length value.hot-corners) > 0) then
-                    {
-                        top-left = mkIf (builtins.elem "top-left" value.hot-corners) [ ];
-                        top-right = mkIf (builtins.elem "top-right" value.hot-corners) [ ];
-                        bottom-left = mkIf (builtins.elem "bottom-left" value.hot-corners) [ ];
-                        bottom-right = mkIf (builtins.elem "bottom-right" value.hot-corners) [ ];
-                    }
-                else
-                    { off = [ ]; };
+            hot-corners = mkIf ((length value.hot-corners) > 0) {
+                top-left = mkIf (builtins.elem "top-left" value.hot-corners) [ ];
+                top-right = mkIf (builtins.elem "top-right" value.hot-corners) [ ];
+                bottom-left = mkIf (builtins.elem "bottom-left" value.hot-corners) [ ];
+                bottom-right = mkIf (builtins.elem "bottom-right" value.hot-corners) [ ];
+            };
             layout = mkIfNotNull value.layout;
         }) cfg);
     };
