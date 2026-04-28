@@ -108,12 +108,11 @@ in
         debug = mkIfNotNull cfg.debug;
         blur = mkIfNotEmpty (
             if (isNull cfg.blur.enable) then {} else (if cfg.blur.enable then {
-                off = false;
                 passes = mkIfNotNull cfg.blur.passes;
                 offset = mkIfNotNull cfg.blur.offset;
                 noise = mkIfNotNull cfg.blur.noise;
                 saturation = mkIfNotNull cfg.blur.saturation;
-            } else {off = true;})
+            } else {off = [];})
         );
     };
 }
