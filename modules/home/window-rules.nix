@@ -166,6 +166,12 @@ in
                                 inactive-gradient = mkNullOr gradientType;
                                 urgent-gradient = mkNullOr gradientType;
                             };
+                            background-effect = {
+                                xray = mkNullOr types.bool;
+                                blur = mkNullOr types.bool;
+                                noise = mkNullOr (types.ints.between 0 1000);
+                                saturation = mkNullOr (types.ints.between 0 1000);
+                            };
                         };
                     };
                 }
@@ -273,6 +279,22 @@ in
                                         urgent-gradient = mkIf (!isNull urgent-gradient) (renderGradient urgent-gradient);
                                     }; } else { tab-indicator = {off = [ ];}; }
                                 ))
+
+                                (optional (!(
+                                    (isNull dynamic.background-effect.blur) && 
+                                    (isNull dynamic.background-effect.xray) && 
+                                    (isNull dynamic.background-effect.noise) && 
+                                    (isNull dynamic.background-effect.saturation)
+                                )) 
+                                    {
+                                        background-effect = with dynamic.background-effect; {
+                                            xray = mkIfNotNull xray;
+                                            blur = mkIfNotNull blur;
+                                            noise = mkIfNotNull noise;
+                                            saturation = mkIfNotNull saturation;
+                                        };
+                                    }
+                                )
                             ];
 
                 }

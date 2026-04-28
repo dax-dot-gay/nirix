@@ -47,6 +47,13 @@ in
         };
         config-notification.disable-failed = mkBool false;
         debug = mkNullOr types.attrs;
+        blur = optionalBlock {
+            enable = mkNullOr types.bool;
+            passes = mkNullOr (types.ints.between 0 255);
+            offset = mkNullOr types.float;
+            noise = mkNullOr types.float;
+            saturation = mkNullOr types.float;
+        };
     };
     config.wayland.windowManager.niri._raw_settings = {
         spawn-sh-at-startup = mkIf ((length cfg.spawn-at-startup) > 0) (map (v: [ v ]) cfg.spawn-at-startup);
@@ -99,5 +106,14 @@ in
             });
         config-notification = mkIf cfg.config-notification.disable-failed {disable-failed = [ ];};
         debug = mkIfNotNull cfg.debug;
+        blur = mkIfNotEmpty (
+            if (isNull cfg.blur.enable) then {} else (if cfg.blur.enable then {
+                off = false;
+                passes = mkIfNotNull cfg.blur.passes;
+                offset = mkIfNotNull cfg.blur.offset;
+                noise = mkIfNotNull cfg.blur.noise;
+                saturation = mkIfNotNull cfg.blur.saturation;
+            } else {off = true;})
+        );
     };
 }

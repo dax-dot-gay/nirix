@@ -59,6 +59,12 @@ in
                             color = mkNullOr types.str;
                             inactive-color = mkNullOr types.str;
                         };
+                        background-effect = {
+                            xray = mkNullOr types.bool;
+                            blur = mkNullOr types.bool;
+                            noise = mkNullOr (types.ints.between 0 1000);
+                            saturation = mkNullOr (types.ints.between 0 1000);
+                        };
                     };
                 }
             )
@@ -96,6 +102,21 @@ in
                                 };
                             }
                     ))
+                    (optional (!(
+                        (isNull rule.background-effect.blur) && 
+                        (isNull rule.background-effect.xray) && 
+                        (isNull rule.background-effect.noise) && 
+                        (isNull rule.background-effect.saturation)
+                    )) 
+                        {
+                            background-effect = with rule.background-effect; {
+                                xray = mkIfNotNull xray;
+                                blur = mkIfNotNull blur;
+                                noise = mkIfNotNull noise;
+                                saturation = mkIfNotNull saturation;
+                            };
+                        }
+                    )
                 ];
             }) (attrValues cfg)
         );
