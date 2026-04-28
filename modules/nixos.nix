@@ -1,7 +1,6 @@
+{ inputs, ... }:
 {
     pkgs,
-    niri-unstable,
-    niri-unstable-blur,
     lib,
     config,
     ...
@@ -11,8 +10,7 @@ let
     cfg = config.programs.niri;
     variants = {
         stable = pkgs.niri;
-        unstable = niri-unstable.packages.${pkgs.stdenv.hostPlatform.system}.niri;
-        unstable-blur = niri-unstable-blur.packages.${pkgs.stdenv.hostPlatform.system}.niri;
+        unstable = inputs.niri-unstable.packages.${pkgs.stdenv.hostPlatform.system}.niri;
     };
 in
 {
@@ -22,14 +20,12 @@ in
             type = types.enum [
                 "stable"
                 "unstable"
-                "unstable-blur"
             ];
             default = "stable";
             description = ''
                 Which supported variant to choose, if not overridden by `programs.niri.package`.
                 - stable: use niri stable from nixpkgs
                 - unstable: build niri from the repository's main branch
-                - unstable-blur: build niri with the unstable blur branch
             '';
         };
         package = mkOption {

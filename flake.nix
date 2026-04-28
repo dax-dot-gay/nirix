@@ -22,7 +22,7 @@
         {
             lib = lib';
             nixosModules = {
-                nirix = ./modules/nixos.nix;
+                nirix = lib.modules.importApply ./modules/nixos.nix { inherit self; inputs = inputs; };
                 default = self.nixosModules.nirix;
             };
             homeModules = {
