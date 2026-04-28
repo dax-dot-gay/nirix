@@ -26,7 +26,7 @@
                 default = self.nixosModules.nirix;
             };
             homeModules = {
-                nirix = lib.modules.importApply ./modules/home { inherit self; };
+                nirix = lib.modules.importApply ./modules/home { inherit self; inputs = inputs; };
                 default = self.homeModules.nirix;
             };
         };

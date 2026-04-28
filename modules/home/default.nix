@@ -1,9 +1,8 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
     config,
     lib,
     pkgs,
-    niri-unstable,
     ...
 }:
 with lib;
@@ -11,7 +10,7 @@ let
     cfg = config.wayland.windowManager.niri;
     variants = {
         stable = pkgs.niri;
-        unstable = niri-unstable.packages.${pkgs.stdenv.hostPlatform.system}.niri;
+        unstable = inputs.niri-unstable.packages.${pkgs.stdenv.hostPlatform.system}.niri;
     };
 in
 {
